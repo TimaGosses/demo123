@@ -75,11 +75,13 @@ class ImageCarActivity : AppCompatActivity() {
         recyclerViewImages.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false) //установка горизонтальной ориентации
         recyclerViewImages.adapter = imageAdapter
 
+        reqestPermissions()
+
         //Кнопка выбора фото из галереи
         buttonPickFromGallery.setOnClickListener {
             pickImageFromGallery()
         }
-        //нопка съемки фото
+        //Кнопка съемки фото
         buttonTakePhoto.setOnClickListener {
             takePhoto()
         }
@@ -133,13 +135,21 @@ class ImageCarActivity : AppCompatActivity() {
     //запуск выбора изображений из галереи
     private fun pickImageFromGallery(){
         //intent для открытия галереи
-        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "image/*"
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true) //разрешение множественного выбора
+        }
         //запуск активности
-        startActivityForResult(intent, REQUEST_IMAGE_PICK)
+        startActivityForResult(Intent.createChooser(intent, "Выберите изображения"), REQUEST_IMAGE_PICK)
 
     }
     //запуск камеры для съемки
     private fun takePhoto() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+            Toast.makeText(this@ImageCarActivity,"Требуется разрешения на доступ к камере",Toast.LENGTH_SHORT).show()
+            reqestPermissions()
+            return
+        }
         //intent для съемки фото
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         //проверка наличия приложения камеры
@@ -176,13 +186,28 @@ class ImageCarActivity : AppCompatActivity() {
         if (resultCode == RESULT_OK) {
             when (requestCode) {
                 REQUEST_IMAGE_PICK -> {
-                    //обработка выбора из галереи
-                    data?.data?.let { uri ->
-                        imageUris.add(uri) //добавление uri  список
-                        imageAdapter.notifyItemInserted(imageUris.size - 1) // Уведомляем адаптер
-                        recyclerViewImages.scrollToPosition(imageUris.size - 1) // Прокручиваем к новому
-                        Log.d("ImageUploadActivity", "Выбрано изображение: $uri")
+                    if (data?.clipData != null){
+                        //Если выбрано несколько изображений
+                        val clipData = data.clipData
+                        for (i in 0 until clipData!!.itemCount){
+                            val uri = clipData.getItemAt(i).uri
+                            imageUris.add(uri)
+                            Log.d("ImageCarActibity","Добавлен Uri: ${uri}, размер списка: ${imageUris.size}")
+                            imageAdapter.notifyItemInserted(imageUris.size - 1)
+                            recyclerViewImages.scrollToPosition(imageUris.size - 1)
+                            Log.d("ImageCarActivity","Выбрано изображение: $uri")
+
+                        }
+                    }else{
+                        //Если выбрано одно изображение
+                        data?.data?.let { uri ->
+                            imageUris.add(uri) //добавление uri  список
+                            imageAdapter.notifyItemInserted(imageUris.size - 1) // Уведомляем адаптер
+                            recyclerViewImages.scrollToPosition(imageUris.size - 1) // Прокручиваем к новому
+                            Log.d("ImageUploadActivity", "Выбрано изображение: $uri")
+                        }
                     }
+
                 }
 
                 REQUEST_IMAGE_CAPTURE -> {
@@ -228,6 +253,10 @@ class ImageCarActivity : AppCompatActivity() {
                     Toast.makeText(this@ImageCarActivity, "Изображения успешно загружены", Toast.LENGTH_SHORT).show()
                     imageUris.clear() // Очищаем список
                     imageAdapter.notifyDataSetChanged() // Обновляем RecyclerView
+                    //очистка времменого файла
+                    tempPhotoFile?.delete()
+                    tempPhotoFile = null
+
                 }
             } catch (e: Exception) {
                 // Обрабатываем ошибки
