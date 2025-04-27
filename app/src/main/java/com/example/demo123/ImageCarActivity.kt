@@ -63,10 +63,10 @@ class ImageCarActivity : AppCompatActivity() {
     private lateinit var recyclerViewImages: RecyclerView
     private lateinit var buttonUploadImages: Button
     private val supabaseClient by lazy { (application as MyApplication).supabase }
-    private val imageUrls = mutableListOf<String>() // Список Uri для хранения ссылок на выбранные фото
+    private val imageUrls =
+        mutableListOf<String>() // Список Uri для хранения ссылок на выбранные фото
     private var tempPhotoFile: File? = null //Для хранения временного файла фото
     private val imageAdapter = ImageAdapter()  //передаем список Uri в адаптер
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,7 +77,11 @@ class ImageCarActivity : AppCompatActivity() {
         buttonPickFromGallery = findViewById(R.id.buttonPickFromGallery)
         //Инициализация RecycleView
         recyclerViewImages = findViewById(R.id.recyclerViewImages)
-        recyclerViewImages.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false) //установка горизонтальной ориентации
+        recyclerViewImages.layoutManager = LinearLayoutManager(
+            this,
+            LinearLayoutManager.HORIZONTAL,
+            false
+        ) //установка горизонтальной ориентации
         recyclerViewImages.adapter = imageAdapter
 
         reqestPermissions()
@@ -99,6 +103,7 @@ class ImageCarActivity : AppCompatActivity() {
             uploadImagesToSupabase()
         }
 
+    }
     }
     // Запрос разрешения на доступ к галерее и камере
     private fun reqestPermissions() {
@@ -191,7 +196,7 @@ class ImageCarActivity : AppCompatActivity() {
             //добавление категории и типа для повышения совместимости
             addCategory(Intent.CATEGORY_DEFAULT)
             type = "image/*"
-            setPackage("com.google.android.GoogleCamera")
+           
         }
         Log.d("ImageCarActivity", "Создан Intent для камеры: $intent")
 
@@ -263,6 +268,7 @@ class ImageCarActivity : AppCompatActivity() {
                         Log.d("ImageCarActivity", "Выбрано несколько изображений: ${clipData!!.itemCount}")
                         for (i in 0 until clipData.itemCount) {
                             val uri = clipData.getItemAt(i).uri
+                            Log.d("ImageCarActivity", "Обрабатываем Uri: $uri")
                             copyUriToTempFile(uri)?.let { tempFile ->
                                 imageAdapter.addFile(tempFile)
                                 Log.d("ImageCarActivity", "Добавлен элемент, текущий размер адаптера: ${imageAdapter.itemCount}")
@@ -270,9 +276,9 @@ class ImageCarActivity : AppCompatActivity() {
                                 Log.e("ImageCarActivity", "Не удалось скопировать Uri: $uri")
                             }
                         }
-                        imageAdapter.notifyDataSetChanged()
                     } else {
                         data?.data?.let { uri ->
+                            Log.d("ImageCarActivity", "Обрабатываем одиночный Uri: $uri")
                             copyUriToTempFile(uri)?.let { tempFile ->
                                 imageAdapter.addFile(tempFile)
                                 Log.d("ImageCarActivity", "Добавлен элемент, текущий размер адаптера: ${imageAdapter.itemCount}")
@@ -280,14 +286,12 @@ class ImageCarActivity : AppCompatActivity() {
                                 Log.e("ImageCarActivity", "Не удалось скопировать Uri: $uri")
                             }
                         }
-                        imageAdapter.notifyDataSetChanged()
                     }
                 }
                 REQUEST_IMAGE_CAPTURE -> {
                     tempPhotoFile?.let { file ->
                         imageAdapter.addFile(file)
                         Log.d("ImageCarActivity", "Добавлен элемент, текущий размер адаптера: ${imageAdapter.itemCount}")
-                        imageAdapter.notifyDataSetChanged()
                     }
                 }
             }
@@ -308,13 +312,19 @@ class ImageCarActivity : AppCompatActivity() {
             Log.d("ImageCarActivity", "Создан временный файл: $tempFile")
             contentResolver.openInputStream(uri)?.use { input ->
                 FileOutputStream(tempFile).use { output ->
-                    input.copyTo(output)
-                    Log.d("ImageCarActivity", "Файл скопирован: $tempFile")
+                    val bytesCopied = input.copyTo(output)
+                    Log.d("ImageCarActivity", "Скопировано байт: $bytesCopied для файла: $tempFile")
                 }
+            } ?: run {
+                Log.e("ImageCarActivity", "Не удалось открыть InputStream для Uri: $uri")
+                return null
             }
             return tempFile
+        } catch (e: SecurityException) {
+            Log.e("ImageCarActivity", "Ошибка безопасности при копировании Uri: ${e.message}", e)
+            return null
         } catch (e: Exception) {
-            Log.e("ImageCarActivity", "Ошибка копирования URI: ${e.message}")
+            Log.e("ImageCarActivity", "Ошибка копирования Uri: ${e.message}", e)
             return null
         }
     }
