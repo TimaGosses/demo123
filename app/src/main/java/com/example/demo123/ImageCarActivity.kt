@@ -28,12 +28,16 @@ import io.ktor.http.Url
 import kotlinx.coroutines.MainScope
 import android.Manifest
 import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.provider.Settings
 import android.util.Log
+import android.widget.LinearLayout
+import androidx.compose.ui.text.font.FontVariation
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
@@ -45,6 +49,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.IOException
 import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -53,14 +58,14 @@ import kotlin.io.path.createTempFile
 
 class ImageCarActivity : AppCompatActivity() {
 
-    private lateinit var buttonPickFromGallery: Button
-    private lateinit var buttonTakePhoto: Button
+    private lateinit var buttonPickFromGallery: LinearLayout
+    private lateinit var buttonTakePhoto: LinearLayout
     private lateinit var recyclerViewImages: RecyclerView
     private lateinit var buttonUploadImages: Button
     private val supabaseClient by lazy { (application as MyApplication).supabase }
-    private val imageUris = mutableListOf<Uri>() // Список Uri для хранения ссылок на выбранные фото
+    private val imageUrls = mutableListOf<String>() // Список Uri для хранения ссылок на выбранные фото
     private var tempPhotoFile: File? = null //Для хранения временного файла фото
-    private val imageAdapter = ImageAdapter(imageUris)  //передаем список Uri в адаптер
+    private val imageAdapter = ImageAdapter()  //передаем список Uri в адаптер
 
 
 
@@ -87,8 +92,8 @@ class ImageCarActivity : AppCompatActivity() {
         }
         //Кнопка загрузки
         findViewById<Button>(R.id.buttonUploadImages).setOnClickListener {
-            if (imageUris.isEmpty()){
-                Toast.makeText(this,"Добавьте хотябы одно изобрадение", Toast.LENGTH_SHORT).show()
+            if (imageAdapter.getFiles().isEmpty()) {  // Используем imageAdapter.getFiles()
+                Toast.makeText(this, "Добавьте хотя бы одно изображение", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             uploadImagesToSupabase()
@@ -103,7 +108,6 @@ class ImageCarActivity : AppCompatActivity() {
             permission.add(Manifest.permission.READ_MEDIA_IMAGES)//Для android 13+
         }else{
             permission.add(Manifest.permission.READ_EXTERNAL_STORAGE) //для чтения галереи
-            permission.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)//для записи файлов
         }
         permission.add(Manifest.permission.CAMERA)//для камеры
 
@@ -112,7 +116,11 @@ class ImageCarActivity : AppCompatActivity() {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
         if (permissionToRequest.isNotEmpty()){
+            Log.d("ImageCarActivity","Запрашиваем разрешения: ${permissionToRequest}")
             ActivityCompat.requestPermissions(this, permissionToRequest.toTypedArray(), REQUEST_PERMISSIONS)
+        }
+        else{
+            Log.d("ImageCarActivity","Все разрешения уже предоставлены")
         }
 
     }
@@ -124,12 +132,35 @@ class ImageCarActivity : AppCompatActivity() {
     ){
         super.onRequestPermissionsResult(requestCode, permission, grantResults)
         if (requestCode == REQUEST_PERMISSIONS){
-            if (grantResults.all {it == PackageManager.PERMISSION_GRANTED }){
-                //Все разрешения получены
+            val deniedPermissions = mutableListOf<String>()
+            permission.forEachIndexed { index, permission ->
+                if (grantResults[index] != PackageManager.PERMISSION_GRANTED){
+                    deniedPermissions.add(permission)
+                }
+            }
+            if (deniedPermissions.isEmpty()){
                 Log.d("ImageCarActivity","Все разрешения получены")
-            }else
-                //не все разрешения получены
-                Toast.makeText(this@ImageCarActivity,"Не все разрешения получены",Toast.LENGTH_SHORT).show()
+            }else{
+                Log.d("ImageCarActivity","Отклоненные разрешения: $deniedPermissions")
+                Toast.makeText(this@ImageCarActivity,"Не все разрешения получены: $deniedPermissions",
+                    Toast.LENGTH_SHORT).show()
+            }
+            //Если разрешение самеры отклоненно
+            if(deniedPermissions.contains(Manifest.permission.CAMERA)){
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)){
+                    //Объяснение почему нужно разрешение
+                    Toast.makeText(this@ImageCarActivity,"РАзрешение на камеру необходимо для съемки фото",Toast.LENGTH_SHORT).show()
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), REQUEST_PERMISSIONS)
+                }
+                else{
+                    //Если пользователь выбрал не заправшивать снова
+                    Toast.makeText(this@ImageCarActivity,"Пожалуйста, включите разрешение на доступ к камере",Toast.LENGTH_SHORT).show()
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("packege", packageName, null)
+                    }
+                    startActivity(intent)
+                }
+            }
         }
     }
     //запуск выбора изображений из галереи
@@ -145,36 +176,76 @@ class ImageCarActivity : AppCompatActivity() {
     }
     //запуск камеры для съемки
     private fun takePhoto() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
-            Toast.makeText(this@ImageCarActivity,"Требуется разрешения на доступ к камере",Toast.LENGTH_SHORT).show()
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this@ImageCarActivity, "Требуется разрешение на доступ к камере", Toast.LENGTH_SHORT).show()
             reqestPermissions()
             return
         }
-        //intent для съемки фото
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        //проверка наличия приложения камеры
-        if (intent.resolveActivity(packageManager) != null) {
-            //создание времменого файла
-            val photoFile: File? = try {
-                createTempImageFile()
-            } catch (e: IOException) {
-                Log.e("ImageCarActivity", "Ошибка создания временного файла: ${e.message}", e)
-                null
-            }
-            photoFile?.let {
-                tempPhotoFile = it //сохранение ссылки на файл
-                //Получение Uri через FileProvider
-                val photoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", it)
-                //указываем куда сохранить фото
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                //запуск камеры
-                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
-            } ?: run {
-                Toast.makeText(
-                    this@ImageCarActivity,
-                    "Не удалось создать файл для фото",
-                    Toast.LENGTH_SHORT
-                ).show()
+
+        val startTime = System.currentTimeMillis()
+        Log.d("ImageCarActivity","Начало takePhoto")
+
+        // Intent для съемки фото
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            //добавление категории и типа для повышения совместимости
+            addCategory(Intent.CATEGORY_DEFAULT)
+            type = "image/*"
+            setPackage("com.google.android.GoogleCamera")
+        }
+        Log.d("ImageCarActivity", "Создан Intent для камеры: $intent")
+
+        // Проверка доступности камеры через PackageManager
+        val hasCamera = packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
+        Log.d("ImageCarActivity", "Устройство поддерживает камеру: $hasCamera")
+        if (!hasCamera) {
+            Toast.makeText(this@ImageCarActivity, "Устройство не поддерживает камеру", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Проверка наличия приложений для камеры
+        val activitiesStart = System.currentTimeMillis()
+        val activities = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        Log.d("ImageCarActivity", "Поиск приложений для камеры занял ${System.currentTimeMillis() - activitiesStart} мс")
+        Log.d("ImageCarActivity", "Найдено приложений для камеры: ${activities.size}")
+        activities.forEach { activity ->
+            Log.d("ImageCarActivity", "Доступное приложение: ${activity.activityInfo.packageName}")
+        }
+
+        if (activities.isNotEmpty()) {
+            lifecycleScope.launch(Dispatchers.Main) {
+                // Показываем индикатор подготовки
+                val progressDialog = ProgressDialog(this@ImageCarActivity).apply {
+                    setMessage("Подготовка камеры...")
+                    setCancelable(false)
+                    show()
+                }
+
+                // Создание временного файла в фоновом потоке
+                val photoFile = withContext(Dispatchers.IO) {
+                    try {
+                        createTempImageFile()
+                    } catch (e: IOException) {
+                        Log.e("ImageCarActivity", "Ошибка создания временного файла: ${e.message}", e)
+                        null
+                    }
+                }
+
+                progressDialog.dismiss()
+
+                photoFile?.let {
+                    tempPhotoFile = it
+                    val photoUri = FileProvider.getUriForFile(this@ImageCarActivity, "${packageName}.fileprovider", it)
+                    Log.d("ImageCarActivity", "Получен Uri через FileProvider: $photoUri")
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                    startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+                } ?: run {
+                    Toast.makeText(
+                        this@ImageCarActivity,
+                        "Не удалось создать файл для фото",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         } else {
             Toast.makeText(this@ImageCarActivity, "Камера не доступна", Toast.LENGTH_SHORT).show()
@@ -183,87 +254,95 @@ class ImageCarActivity : AppCompatActivity() {
     //Обрабатывает результаты выбора или съемки
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        Log.d("ImageCarActivity", "onActivityResult: requestCode=$requestCode, resultCode=$resultCode")
         if (resultCode == RESULT_OK) {
             when (requestCode) {
                 REQUEST_IMAGE_PICK -> {
-                    if (data?.clipData != null){
-                        //Если выбрано несколько изображений
+                    if (data?.clipData != null) {
                         val clipData = data.clipData
-                        for (i in 0 until clipData!!.itemCount){
+                        Log.d("ImageCarActivity", "Выбрано несколько изображений: ${clipData!!.itemCount}")
+                        for (i in 0 until clipData.itemCount) {
                             val uri = clipData.getItemAt(i).uri
-                            imageUris.add(uri)
-                            Log.d("ImageCarActibity","Добавлен Uri: ${uri}, размер списка: ${imageUris.size}")
-                            imageAdapter.notifyItemInserted(imageUris.size - 1)
-                            recyclerViewImages.scrollToPosition(imageUris.size - 1)
-                            Log.d("ImageCarActivity","Выбрано изображение: $uri")
-
+                            copyUriToTempFile(uri)?.let { tempFile ->
+                                imageAdapter.addFile(tempFile)
+                                Log.d("ImageCarActivity", "Добавлен элемент, текущий размер адаптера: ${imageAdapter.itemCount}")
+                            } ?: run {
+                                Log.e("ImageCarActivity", "Не удалось скопировать Uri: $uri")
+                            }
                         }
-                    }else{
-                        //Если выбрано одно изображение
+                        imageAdapter.notifyDataSetChanged()
+                    } else {
                         data?.data?.let { uri ->
-                            imageUris.add(uri) //добавление uri  список
-                            imageAdapter.notifyItemInserted(imageUris.size - 1) // Уведомляем адаптер
-                            recyclerViewImages.scrollToPosition(imageUris.size - 1) // Прокручиваем к новому
-                            Log.d("ImageUploadActivity", "Выбрано изображение: $uri")
+                            copyUriToTempFile(uri)?.let { tempFile ->
+                                imageAdapter.addFile(tempFile)
+                                Log.d("ImageCarActivity", "Добавлен элемент, текущий размер адаптера: ${imageAdapter.itemCount}")
+                            } ?: run {
+                                Log.e("ImageCarActivity", "Не удалось скопировать Uri: $uri")
+                            }
                         }
+                        imageAdapter.notifyDataSetChanged()
                     }
-
                 }
-
                 REQUEST_IMAGE_CAPTURE -> {
-                    // Обработка фото с камеры
                     tempPhotoFile?.let { file ->
-                        val uri = FileProvider.getUriForFile(
-                            this,
-                            "${packageName}.fileprovider",
-                            file
-                        )
-                        imageUris.add(uri) // Добавляем Uri в список
-                        imageAdapter.notifyItemInserted(imageUris.size - 1) // Уведомляем адаптер
-                        recyclerViewImages.scrollToPosition(imageUris.size - 1) // Прокручиваем
-                        Log.d("ImageUploadActivity", "Снято фото: $uri")
+                        imageAdapter.addFile(file)
+                        Log.d("ImageCarActivity", "Добавлен элемент, текущий размер адаптера: ${imageAdapter.itemCount}")
+                        imageAdapter.notifyDataSetChanged()
                     }
                 }
             }
+        } else {
+            Log.d("ImageCarActivity", "onActivityResult: resultCode не OK, requestCode=$requestCode, resultCode=$resultCode")
+        }
+    }
+    private fun copyUriToTempFile(uri: Uri): File? {
+        try {
+            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val storageDir = cacheDir
+            Log.d("ImageCarActivity", "Директория для хранения: $storageDir")
+            if (!storageDir.exists()) {
+                storageDir.mkdirs()
+                Log.d("ImageCarActivity", "Создана директория: $storageDir")
+            }
+            val tempFile = File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+            Log.d("ImageCarActivity", "Создан временный файл: $tempFile")
+            contentResolver.openInputStream(uri)?.use { input ->
+                FileOutputStream(tempFile).use { output ->
+                    input.copyTo(output)
+                    Log.d("ImageCarActivity", "Файл скопирован: $tempFile")
+                }
+            }
+            return tempFile
+        } catch (e: Exception) {
+            Log.e("ImageCarActivity", "Ошибка копирования URI: ${e.message}")
+            return null
         }
     }
     // Загружает изображения в Supabase Storage
     private fun uploadImagesToSupabase() {
-        // Запускаем корутину для асинхронной загрузки
+        val supabaseClient = (application as MyApplication).supabase
         lifecycleScope.launch {
             try {
-                // Получаем доступ к бакету car-images
-                val storage = supabaseClient.storage.from("carimage")
-                // Перебираем все изображения
-                imageUris.forEachIndexed { index, uri ->
-                    // Формируем уникальное имя файла
+                imageAdapter.getFiles().forEachIndexed { index, file ->
+                    val byteArray = file.readBytes()
                     val fileName = "image_${System.currentTimeMillis()}_$index.jpg"
-                    Log.d("ImageUploadActivity", "Загружаем изображение: $fileName")
-
-                    // Читаем байты из Uri
-                    val inputStream = contentResolver.openInputStream(uri)
-                    val bytes = inputStream?.readBytes() ?: throw IllegalStateException("Не удалось прочитать файл")
-                    inputStream.close()
-
-                    // Загружаем файл в Supabase
-                    storage.upload(fileName, bytes)
+                    val response = supabaseClient.storage.from("car-images").upload(
+                        path = fileName,
+                        data = byteArray
+                    ) {
+                        upsert = false  // Перемещаем upsert внутрь лямбда-выражения
+                    }
+                    Log.d("ImageCarActivity", "Изображение загружено: $response")
+                    val publicUrl = supabaseClient.storage.from("car-images").publicUrl(fileName)
+                    imageUrls.add(publicUrl)
                 }
-                // Обновляем UI в главном потоке
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@ImageCarActivity, "Изображения успешно загружены", Toast.LENGTH_SHORT).show()
-                    imageUris.clear() // Очищаем список
-                    imageAdapter.notifyDataSetChanged() // Обновляем RecyclerView
-                    //очистка времменого файла
-                    tempPhotoFile?.delete()
-                    tempPhotoFile = null
-
-                }
+                Toast.makeText(this@ImageCarActivity, "Изображения загружены", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this@ImageCarActivity, SplashActivity::class.java)
+                intent.putStringArrayListExtra("imageUrls", ArrayList(imageUrls))
+                startActivity(intent)
             } catch (e: Exception) {
-                // Обрабатываем ошибки
-                withContext(Dispatchers.Main) {
-                    Log.e("ImageUploadActivity", "Ошибка загрузки: ${e.message}", e)
-                    Toast.makeText(this@ImageCarActivity, "Ошибка загрузки: ${e.message}", Toast.LENGTH_LONG).show()
-                }
+                Log.e("ImageCarActivity", "Ошибка загрузки изображений: ${e.message}")
+                Toast.makeText(this@ImageCarActivity, "Ошибка загрузки: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }

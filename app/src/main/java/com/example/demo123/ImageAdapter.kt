@@ -1,34 +1,82 @@
 package com.example.demo123
 
-import android.net.Uri
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import android.graphics.drawable.Drawable
+import java.io.File
 
-// Класс адаптера для RecyclerView, отображающий список изобрвжений
-class ImageAdapter(private val imageUris: List<Uri>) : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
-    //Внутренний класс ViewHolder, хранит ссылку на ImageView для каждого элемента
+class ImageAdapter : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
+    private val imageFiles: MutableList<File> = mutableListOf()
+
     class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.findViewById(R.id.imageView1)
-        //ImageView будет содержать изображение, загруженное через Uri
     }
-    //Создает новый ImageHolter, раздувая макет item_image.xml
+
+    fun addFile(file: File) {
+        imageFiles.add(file)
+        Log.d("ImageAdapter", "Добавлен File в адаптер: $file, размер списка: ${imageFiles.size}")
+        notifyItemInserted(imageFiles.size - 1)
+    }
+
+    fun getFiles(): List<File> {
+        return imageFiles
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_image, parent, false)
-        //раздуваем макет item_image.xml, для одного фото
+        Log.d("ImageAdapter", "Создан ViewHolder")
         return ImageViewHolder(view)
     }
-    //Привязывает данные (Uri) к ViewHolter для отображения изображения
+
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        val uri = imageUris[position] //Получаем Uri изображения из позиции
-        Glide.with(holder.imageView.context) //Используется Glide для загрузки изображения
-            .load(uri)  //ЗАгружаем изображение из Uri
-            .centerCrop() //Обрезаем изображение по центру
-            .into(holder.imageView) //Отображаем в ImageWiew
+        Log.d("ImageAdapter", "onBindViewHolder: position=$position")
+        val file = imageFiles[position]
+        Log.d("ImageAdapter", "Загружаем File: $file")
+        Log.d("ImageAdapter", "Файл существует: ${file.exists()}, размер: ${file.length()} байт")
+        Glide.with(holder.imageView.context)
+            .load(file)
+            .thumbnail(0.25f)
+            .override(200, 200)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .error(R.drawable.ic_launcher_background)
+            .centerCrop()
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    Log.e("ImageAdapter", "Ошибка загрузки изображения: ${e?.message}")
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable,
+                    model: Any,
+                    target: Target<Drawable>,
+                    dataSource: DataSource,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    Log.d("ImageAdapter", "Изображение загружено: $model")
+                    return false
+                }
+            })
+            .into(holder.imageView)
     }
-    //Возвращает кол-во изображений в списке
-    override fun getItemCount(): Int = imageUris.size
+
+    override fun getItemCount(): Int {
+        Log.d("ImageAdapter", "Размер списка: ${imageFiles.size}")
+        return imageFiles.size
+    }
 }

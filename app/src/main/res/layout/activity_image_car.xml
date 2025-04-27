@@ -1,44 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="#1C2526">
 
-    <!-- Контейнер для кнопок "Выбрать из галереи и Снять фото" -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <Button
-            android:id="@+id/buttonPickFromGallery"
-            android:layout_width="wrap_content"
+        <!-- Заголовок -->
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Выбрать из галереи" />
+            android:text="Покажите машину снаружи и внутри"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
 
-        <Button
-            android:id="@+id/buttonTakePhoto"
-            android:layout_width="wrap_content"
+
+
+        <!-- Секция для выбора фото -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Снять фото" />
+            android:orientation="vertical"
+            android:background="@android:color/transparent"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Фото"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Контейнер для кнопок "Выбрать из галереи" и "Снять фото" -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="start">
+
+                <!-- Кнопка "Выбрать из галереи" -->
+                <LinearLayout
+                    android:id="@+id/buttonPickFromGallery"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:background="@drawable/rounded_card_background"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_marginEnd="8dp"
+                    android:padding="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_gallery"
+                         />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Галерея"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textAlignment="center" />
+                </LinearLayout>
+
+                <!-- Кнопка "Снять фото" -->
+                <LinearLayout
+                    android:id="@+id/buttonTakePhoto"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:background="@drawable/rounded_card_background"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_camera"
+                         />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Добавить фото"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textAlignment="center" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- RecyclerView для отображения ленты выбранных изображений -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewImages"
+                android:layout_width="match_parent"
+                android:layout_height="152dp"
+                android:background="#1C2526"
+                android:orientation="horizontal" />
+
+        </LinearLayout>
+
+        <!-- Секция для ввода ссылки на видео -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Кнопка "Загрузить изображения" -->
+        <Button
+            android:id="@+id/buttonUploadImages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Продолжить"
+            android:backgroundTint="#00C4B4"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:layout_marginTop="16dp" />
 
     </LinearLayout>
-
-    <!-- RecyclerView для отображения ленты выбранных изображений -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewImages"
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:layout_marginTop="16dp"
-        android:orientation="horizontal" />
-
-    <Button
-        android:id="@+id/buttonUploadImages"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Загрузить изображения" />
-
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>
