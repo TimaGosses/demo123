@@ -75,6 +75,12 @@ class GetCar : AppCompatActivity() {
         buttonGetImage = findViewById(R.id.buttonGetImage)
 
         val supabaseClient = (application as MyApplication).supabase   //Подключение к Supabase
+        savedInstanceState?.let {
+            val carId = it.getString("car_id")
+            if (carId != null){
+                buttonGetImage.isEnabled = true
+            }
+        }
 
         suspend fun <T : Any> loadDataIntosSpinner(  //Асинхронная функция(работает в фоновом режиме) для отображения и выбора данных для спиннеров
             tableName: String,  //Имя таблицы в БД
