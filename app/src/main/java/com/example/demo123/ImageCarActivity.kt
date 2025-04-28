@@ -68,43 +68,17 @@ class ImageCarActivity : AppCompatActivity() {
     private val imageAdapter = ImageAdapter()  //передаем список Uri в адаптер
 
 
-    private val pickImagesLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
-        uris?.let {
-            Log.d("ImageCarActivity", "Выбрано изображений: ${uris.size}")
-            for (uri in uris) {
-                Log.d("ImageCarActivity", "Обрабатываем Uri: $uri")
-                copyUriToTempFile(uri)?.let { tempFile ->
-                    imageAdapter.addFile(tempFile)
-                    Log.d("ImageCarActivity", "Добавлен элемент, текущий размер адаптера: ${imageAdapter.itemCount}")
-                } ?: run {
-                    Log.e("ImageCarActivity", "Не удалось скопировать Uri: $uri")
-                }
-            }
-        } ?: run {
-            Log.d("ImageCarActivity", "Выбор изображений отменён")
-        }
-    }
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_image_car)
-
-        val carId = intent.getStringExtra("car_id")
-        if (carId == null){
-            Toast.makeText(this@ImageCarActivity,"Не указан if автомобиля",Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
         buttonTakePhoto = findViewById(R.id.buttonTakePhoto)
         buttonPickFromGallery = findViewById(R.id.buttonPickFromGallery)
         //Инициализация RecycleView
         recyclerViewImages = findViewById(R.id.recyclerViewImages)
         recyclerViewImages.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false) //установка горизонтальной ориентации
         recyclerViewImages.adapter = imageAdapter
-
 
         reqestPermissions()
 
@@ -126,7 +100,6 @@ class ImageCarActivity : AppCompatActivity() {
         }
 
     }
-
     // Запрос разрешения на доступ к галерее и камере
     private fun reqestPermissions() {
         val permission = mutableListOf<String>()
@@ -191,18 +164,15 @@ class ImageCarActivity : AppCompatActivity() {
         }
     }
     //запуск выбора изображений из галереи
-    private fun pickImageFromGallery() {
-        val requiredPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_IMAGES
-        } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
+    private fun pickImageFromGallery(){
+        //intent для открытия галереи
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "image/*"
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true) //разрешение множественного выбора
         }
-        if (ContextCompat.checkSelfPermission(this, requiredPermission) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Требуется разрешение на доступ к галерее", Toast.LENGTH_SHORT).show()
-            reqestPermissions()
-            return
-        }
-        pickImagesLauncher.launch("image/*")
+        //запуск активности
+        startActivityForResult(Intent.createChooser(intent, "Выберите изображения"), REQUEST_IMAGE_PICK)
+
     }
     //запуск камеры для съемки
     private fun takePhoto() {
@@ -293,7 +263,6 @@ class ImageCarActivity : AppCompatActivity() {
                         Log.d("ImageCarActivity", "Выбрано несколько изображений: ${clipData!!.itemCount}")
                         for (i in 0 until clipData.itemCount) {
                             val uri = clipData.getItemAt(i).uri
-                            Log.d("ImageCarActivity", "Обрабатываем Uri: $uri")
                             copyUriToTempFile(uri)?.let { tempFile ->
                                 imageAdapter.addFile(tempFile)
                                 Log.d("ImageCarActivity", "Добавлен элемент, текущий размер адаптера: ${imageAdapter.itemCount}")
@@ -301,9 +270,9 @@ class ImageCarActivity : AppCompatActivity() {
                                 Log.e("ImageCarActivity", "Не удалось скопировать Uri: $uri")
                             }
                         }
+                        imageAdapter.notifyDataSetChanged()
                     } else {
                         data?.data?.let { uri ->
-                            Log.d("ImageCarActivity", "Обрабатываем одиночный Uri: $uri")
                             copyUriToTempFile(uri)?.let { tempFile ->
                                 imageAdapter.addFile(tempFile)
                                 Log.d("ImageCarActivity", "Добавлен элемент, текущий размер адаптера: ${imageAdapter.itemCount}")
@@ -311,12 +280,14 @@ class ImageCarActivity : AppCompatActivity() {
                                 Log.e("ImageCarActivity", "Не удалось скопировать Uri: $uri")
                             }
                         }
+                        imageAdapter.notifyDataSetChanged()
                     }
                 }
                 REQUEST_IMAGE_CAPTURE -> {
                     tempPhotoFile?.let { file ->
                         imageAdapter.addFile(file)
                         Log.d("ImageCarActivity", "Добавлен элемент, текущий размер адаптера: ${imageAdapter.itemCount}")
+                        imageAdapter.notifyDataSetChanged()
                     }
                 }
             }
@@ -337,19 +308,13 @@ class ImageCarActivity : AppCompatActivity() {
             Log.d("ImageCarActivity", "Создан временный файл: $tempFile")
             contentResolver.openInputStream(uri)?.use { input ->
                 FileOutputStream(tempFile).use { output ->
-                    val bytesCopied = input.copyTo(output)
-                    Log.d("ImageCarActivity", "Скопировано байт: $bytesCopied для файла: $tempFile")
+                    input.copyTo(output)
+                    Log.d("ImageCarActivity", "Файл скопирован: $tempFile")
                 }
-            } ?: run {
-                Log.e("ImageCarActivity", "Не удалось открыть InputStream для Uri: $uri")
-                return null
             }
             return tempFile
-        } catch (e: SecurityException) {
-            Log.e("ImageCarActivity", "Ошибка безопасности при копировании Uri: ${e.message}", e)
-            return null
         } catch (e: Exception) {
-            Log.e("ImageCarActivity", "Ошибка копирования Uri: ${e.message}", e)
+            Log.e("ImageCarActivity", "Ошибка копирования URI: ${e.message}")
             return null
         }
     }
@@ -361,7 +326,7 @@ class ImageCarActivity : AppCompatActivity() {
                 imageAdapter.getFiles().forEachIndexed { index, file ->
                     val byteArray = file.readBytes()
                     val fileName = "image_${System.currentTimeMillis()}_$index.jpg"
-                    val response = supabaseClient.storage.from("car-images").upload(
+                    val response = supabaseClient.storage.from("carimage").upload(
                         path = fileName,
                         data = byteArray
                     ) {
@@ -398,4 +363,5 @@ class ImageCarActivity : AppCompatActivity() {
         private const val REQUEST_PERMISSIONS = 102 // Для запроса разрешений
     }
 }
+
 
