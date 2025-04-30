@@ -48,4 +48,32 @@ data class CarDataWithId(
     val VIN: String,
     val Владелец: String
 )
+@Serializable
+data class CarResponse(
+    val carId: String,
+    val Марка: String,
+    val Модель: String,
+    val Год_выпуска: Int,
+    val Цена_за_сутки: Int,
+    val Коробка_передач: Int,
+    val Местоположение: Int,
+    val Владелец: String
+)
 
+@Serializable
+data class Car(
+    val car_id: String,
+    val Марка: String,
+    val Модель: String,
+    val Год_выпуска: Int,
+    val Коробка_передач: Int,
+    val Цена_за_сутки: Int,
+    val Местоположение: Int,
+    val imageUrls: List<String>,
+    val Владелец: String
+)
+@Serializable
+data class CarImageS(
+    val carId: String,
+    val imageUrl: String
+)

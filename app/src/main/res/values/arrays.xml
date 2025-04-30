@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="filter_brands">
+        <item>Марка</item>
+        <item>Kia</item>
+        <item>Mitsubishi</item>
+        <item>Toyota</item>
+    </string-array>
+
+    <string-array name="filter_body_types">
+        <item>Кузов</item>
+        <item>Седан</item>
+        <item>Кроссовер</item>
+        <item>Хэтчбек</item>
+    </string-array>
+
+    <string-array name="filter_price">
+        <item>Стоимость</item>
+        <item>До 2000 ₽</item>
+        <item>2000-4000 ₽</item>
+        <item>Более 4000 ₽</item>
+    </string-array>
+
+    <string-array name="filter_class">
+        <item>Класс авто</item>
+        <item>Эконом</item>
+        <item>Комфорт</item>
+        <item>Премиум</item>
+    </string-array>
+</resources>

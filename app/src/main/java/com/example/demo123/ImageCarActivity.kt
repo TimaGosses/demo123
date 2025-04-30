@@ -66,6 +66,8 @@ class ImageCarActivity : AppCompatActivity() {
     private val imageUrls = mutableListOf<String>() // Список Uri для хранения ссылок на выбранные фото
     private var tempPhotoFile: File? = null //Для хранения временного файла фото
     private val imageAdapter = ImageAdapter()  //передаем список Uri в адаптер
+    private var carId: String? = null
+    private var userId: String? = null
 
 
 
@@ -73,6 +75,10 @@ class ImageCarActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_image_car)
+
+        //получение user_id и car_id
+        carId = intent.getStringExtra("car_id")
+        userId = intent.getStringExtra("user_id")
         buttonTakePhoto = findViewById(R.id.buttonTakePhoto)
         buttonPickFromGallery = findViewById(R.id.buttonPickFromGallery)
         //Инициализация RecycleView
@@ -333,13 +339,23 @@ class ImageCarActivity : AppCompatActivity() {
                         upsert = false  // Перемещаем upsert внутрь лямбда-выражения
                     }
                     Log.d("ImageCarActivity", "Изображение загружено: $response")
-                    val publicUrl = supabaseClient.storage.from("car-images").publicUrl(fileName)
+                    val publicUrl = supabaseClient.storage.from("carimage").publicUrl(fileName)
                     imageUrls.add(publicUrl)
+
+                    //сохранение связи в таблице Изображение_автомобиля
+                    val carImage = mapOf(
+                        "car_id" to carId,
+                        "image_url" to publicUrl,
+                        "user_id" to userId
+                    )
+                    supabaseClient.from("Изображение автомобиля").insert(carImage)
+                    Log.d("ImageCarActivity","Запись добавлена в таблицу изображение автомобиля: $carImage")
                 }
                 Toast.makeText(this@ImageCarActivity, "Изображения загружены", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this@ImageCarActivity, SplashActivity::class.java)
                 intent.putStringArrayListExtra("imageUrls", ArrayList(imageUrls))
                 startActivity(intent)
+                finish()
             } catch (e: Exception) {
                 Log.e("ImageCarActivity", "Ошибка загрузки изображений: ${e.message}")
                 Toast.makeText(this@ImageCarActivity, "Ошибка загрузки: ${e.message}", Toast.LENGTH_SHORT).show()

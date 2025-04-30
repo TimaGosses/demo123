@@ -50,7 +50,8 @@ class GetCar : AppCompatActivity() {
     private var city: List<City> = emptyList()
     private var region: List<Region> = emptyList()
     private var filteredLocations: List<City> = emptyList()
-    private var CarId: String? = null
+    private var carId: String? = null
+    private var userId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) { //Метод вызывающийся при создании Activity
         super.onCreate(savedInstanceState) //Вызов метода onCreate
@@ -75,6 +76,8 @@ class GetCar : AppCompatActivity() {
         buttonGetImage = findViewById(R.id.buttonGetImage)
 
         val supabaseClient = (application as MyApplication).supabase   //Подключение к Supabase
+        val user = supabaseClient.auth.currentUserOrNull()
+        val userId = user?.id
         savedInstanceState?.let {
             val carId = it.getString("car_id")
             if (carId != null){
@@ -145,8 +148,12 @@ class GetCar : AppCompatActivity() {
                     Toast.makeText(this@GetCar,"Пользователь не авторизован", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }*/
-                val intent = Intent(this@GetCar, ImageCarActivity::class.java)
+                val intent = Intent(this@GetCar, ImageCarActivity::class.java).apply {
+                    putExtra("car_id",carId)
+                    putExtra("user_id",userId) //передача user_id и car_id в ImageCarActivity
+                }
                 //intent.putExtra("user_id", userId)
+
             startActivity(intent)
         }
 
@@ -286,6 +293,7 @@ class GetCar : AppCompatActivity() {
 
             // Создание данных автомобиля
             val carData = CarData(
+                car_id = null,
                 Марка = Mark,
                 Модель = Model,
                 Год_выпуска = EORS,
