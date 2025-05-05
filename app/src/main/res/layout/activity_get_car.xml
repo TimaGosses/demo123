@@ -24,43 +24,43 @@
 
         <EditText
             android:id="@+id/editTextMark"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="334dp"
+            android:layout_height="41dp"
             android:layout_marginTop="20dp"
             android:ems="10"
-            android:inputType="text"
             android:hint="Марка"
+            android:inputType="text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
         <EditText
             android:id="@+id/editTextModel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="334dp"
+            android:layout_height="38dp"
             android:layout_marginTop="20dp"
             android:ems="10"
-            android:inputType="text"
             android:hint="Модель"
+            android:inputType="text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editTextMark" />
 
         <EditText
             android:id="@+id/editTextEarOfRelease"
-            android:layout_width="wrap_content"
+            android:layout_width="334dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:ems="10"
-            android:inputType="text"
             android:hint="Год выпуска"
+            android:inputType="text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editTextModel" />
 
         <EditText
             android:id="@+id/editTextPriceOfDay"
-            android:layout_width="wrap_content"
+            android:layout_width="334dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:ems="10"
@@ -72,7 +72,7 @@
 
         <EditText
             android:id="@+id/editTextVIN"
-            android:layout_width="wrap_content"
+            android:layout_width="334dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:ems="10"
@@ -85,7 +85,7 @@
 
         <EditText
             android:id="@+id/editTextDescription"
-            android:layout_width="255dp"
+            android:layout_width="334dp"
             android:layout_height="80dp"
             android:layout_marginTop="20dp"
             android:ems="10"
@@ -106,7 +106,7 @@
 
         <Spinner
             android:id="@+id/spinnerKPP"
-            android:layout_width="282dp"
+            android:layout_width="300dp"
             android:layout_height="25dp"
             android:layout_marginTop="20dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -115,7 +115,7 @@
 
         <Spinner
             android:id="@+id/spinnerReg"
-            android:layout_width="283dp"
+            android:layout_width="300dp"
             android:layout_height="23dp"
             android:layout_marginTop="15dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -124,26 +124,22 @@
 
         <Spinner
             android:id="@+id/spinnerCity"
-            android:layout_width="283dp"
+            android:layout_width="300dp"
             android:layout_height="23dp"
             android:layout_marginTop="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.507"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/spinnerReg" />
-
-        <Button
-            android:id="@+id/buttonGetImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="16dp"
-            android:enabled="false"
-            android:text="Добавить фотографии"
+        <Spinner
+            android:id="@+id/spinnerBody_type"
+            android:layout_width="300dp"
+            android:layout_height="23dp"
+            android:layout_marginTop="10dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.507"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/spinnerCity"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/spinnerCity" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

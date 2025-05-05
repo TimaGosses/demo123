@@ -46,12 +46,14 @@ class GetCar : AppCompatActivity() {
     private lateinit var spinnerReg: Spinner
     private lateinit var spinnerCity: Spinner
     private lateinit var buttonGetImage: Button
+    private lateinit var spinnerBody_type: Spinner
 
 
     private var transmission: List<Transmission> = emptyList()   //Создание листов где в переменную transmission предается список объектов Transmission, и пока что он пустой
     private var city: List<City> = emptyList()
     private var region: List<Region> = emptyList()
     private var filteredLocations: List<City> = emptyList()
+    private var body_type: List<BodyType> = emptyList()
     private var carId: String? = null
     private var userId: String? = null
 
@@ -75,7 +77,9 @@ class GetCar : AppCompatActivity() {
         spinnerKPP = findViewById(R.id.spinnerKPP)
         spinnerReg = findViewById(R.id.spinnerReg)
         spinnerCity = findViewById(R.id.spinnerCity)
-        buttonGetImage = findViewById(R.id.buttonGetImage)
+        buttonGetImage = findViewById(R.id.buttonGetCar)
+        spinnerBody_type = findViewById(R.id.spinnerBody_type)
+
 
         val supabaseClient = (application as MyApplication).supabase   //Подключение к Supabase
         val user = supabaseClient.auth.currentUserOrNull()
@@ -139,6 +143,15 @@ class GetCar : AppCompatActivity() {
                 getName = {(it as City).Название},
                 errorMessage = "Ошибка загрузки города",
                 onDataLoaded = {city = it as List<City>}
+            )
+            loadDataIntosSpinner(
+                tableName = "Тип_кузова",
+                spinner = spinnerBody_type,
+                decodeList = {supabaseClient.from("Тип_кузова").select().decodeList<BodyType>()},
+                getName = { (it as BodyType).Название},
+                errorMessage = "Ошибка загрузки типа кузова",
+                onDataLoaded = {body_type = it as List<BodyType>}
+
             )
         }
 

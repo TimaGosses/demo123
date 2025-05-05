@@ -138,6 +138,11 @@ data class CarLocation(
     val Город: Int
 )
 @Serializable
+data class BodyType(
+    val id: Int,
+    val Название: String
+)
+@Serializable
 data class CarDataWithId(
     val car_id: String,
     val Марка: String,

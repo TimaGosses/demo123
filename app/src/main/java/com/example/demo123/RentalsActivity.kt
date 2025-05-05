@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.interaction.HoverInteraction
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,10 +31,12 @@ class RentalsActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        //Настройка RicyclerView
+        /*//Настройка RicyclerView
         binding.recycleViewCars.layoutManager = LinearLayoutManager(this)
         carAdapter = CarAdapter(emptyList())
         binding.recycleViewCars.adapter = carAdapter
+
+         */
 
         //Загрузка данных
         loadRentaCars()
@@ -64,7 +67,7 @@ class RentalsActivity : AppCompatActivity() {
                 Log.d("RentailsActivity","Загружено: ${carResponse.size} cars: $carResponse")
 
                 //Преобразование CarResponseWithJoins в Car
-                val cars = carResponse.map { carResponse ->
+               /* val cars = carResponse.map { carResponse ->
                     Car(
                         car_id = carResponse.car_id,
                         Марка = carResponse.марка,
@@ -88,7 +91,9 @@ class RentalsActivity : AppCompatActivity() {
                 //обновление адаптера
                 carAdapter = CarAdapter(cars)
                 binding.recycleViewCars.adapter = carAdapter
-                carAdapter.notifyDataSetChanged()
+                carAdapter.notifyDataSetChanged()*/
+            }catch (e: Exception){
+
             }
         }
     }
