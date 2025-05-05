@@ -5,6 +5,8 @@ plugins {
 
 }
 
+
+
 android {
     namespace = "com.example.demo123"
     compileSdk = 35

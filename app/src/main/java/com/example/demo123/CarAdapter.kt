@@ -2,6 +2,7 @@ package com.example.demo123
 
 import androidx.recyclerview.widget.RecyclerView
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,12 +24,16 @@ class CarAdapter(private val cars: List<Car>): RecyclerView.Adapter<CarAdapter.C
         val ratingLayout: LinearLayout = itemView.findViewById(R.id.ratingLayout)
         val textRating: TextView = itemView.findViewById(R.id.textRating)
         val textPrice: TextView = itemView.findViewById(R.id.textPrice)
+
     }
+
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CarViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_car, parent, false)
         return CarViewHolder(view)
     }
+
 
     override fun onBindViewHolder(holder: CarViewHolder, position: Int) {
         val car = cars[position]
@@ -37,12 +42,20 @@ class CarAdapter(private val cars: List<Car>): RecyclerView.Adapter<CarAdapter.C
         holder.textCarName.text = "${car.Марка} ${car.Модель}, ${car.Год_выпуска}"
         holder.textPrice.text = " от ${car.Цена_за_сутки} Р / сутки"
 
-        //загрузка изображений
-        if (car.imageUrls.isNotEmpty()){
-            Glide.with(holder.itemView.context)
-                .load(car.imageUrls[0])
-                .placeholder(R.drawable.placeholder_car)
-                .into(holder.imageCar)
+        fun bind(car: Car) {
+            Log.d("CarAdapter", "Binding car: ${car}")
+
+            if (car.imageUrls.isNotEmpty()) {
+                Glide.with(holder.itemView.context)
+                    .load(car.imageUrls[0])
+                    .placeholder(R.drawable.placeholder_car)
+                    .into(holder.imageCar)
+            } else {
+                Log.d("CarAdapter", "Нет изображений автомобиля: ${car.car_id}{}")
+
+            }
+            //загрузка изображений
+
         }
     }
     override fun getItemCount(): Int = cars.size

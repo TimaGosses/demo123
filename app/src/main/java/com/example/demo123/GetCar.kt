@@ -1,5 +1,6 @@
 package com.example.demo123
 
+
 import android.content.Intent
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.location.Location
@@ -30,6 +31,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Collections.list
+import kotlin.collections.isNotEmpty
 
 class GetCar : AppCompatActivity() {
 
@@ -143,16 +145,16 @@ class GetCar : AppCompatActivity() {
         ButtonGetCar.setOnClickListener {
             newCar()
         }
-            buttonGetImage.setOnClickListener {
-               /* val userId = supabaseClient.auth.currentUserOrNull()?.id ?: run {
-                    Toast.makeText(this@GetCar,"Пользователь не авторизован", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }*/
-                val intent = Intent(this@GetCar, ImageCarActivity::class.java).apply {
-                    putExtra("car_id",carId)
-                    putExtra("user_id",userId) //передача user_id и car_id в ImageCarActivity
-                }
-                //intent.putExtra("user_id", userId)
+        buttonGetImage.setOnClickListener {
+            /* val userId = supabaseClient.auth.currentUserOrNull()?.id ?: run {
+                 Toast.makeText(this@GetCar,"Пользователь не авторизован", Toast.LENGTH_SHORT).show()
+                 return@setOnClickListener
+             }*/
+            val intent = Intent(this@GetCar, ImageCarActivity::class.java).apply {
+                putExtra("car_id",carId)
+                putExtra("user_id",userId) //передача user_id и car_id в ImageCarActivity
+            }
+            //intent.putExtra("user_id", userId)
 
             startActivity(intent)
         }
@@ -211,8 +213,8 @@ class GetCar : AppCompatActivity() {
                 Toast.makeText(this@GetCar, "Выберите город", Toast.LENGTH_SHORT).show()
                 return
             }
-                val regionId = region[Region - 1].id
-                Log.e("GetCar", "Отправляем данные VIN: $VIN, TransmossionID: $transmissionId, CityId: $cityId, RegionId: $regionId")
+            val regionId = region[Region - 1].id
+            Log.e("GetCar", "Отправляем данные VIN: $VIN, TransmossionID: $transmissionId, CityId: $cityId, RegionId: $regionId")
 
             lifecycleScope.launch {
                 try {
