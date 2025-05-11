@@ -1,14 +1,8 @@
 package com.example.demo123
 
-
 import android.content.Intent
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.widget.Adapter
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -16,22 +10,16 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.motion.widget.KeyPosition
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
-import co.touchlab.kermit.Message
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Order
-import io.github.jan.supabase.supabaseJson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Collections.list
-import kotlin.collections.isNotEmpty
 
 class GetCar : AppCompatActivity() {
 
@@ -53,7 +41,7 @@ class GetCar : AppCompatActivity() {
     private var city: List<City> = emptyList()
     private var region: List<Region> = emptyList()
     private var filteredLocations: List<City> = emptyList()
-    private var body_type: List<BodyType> = emptyList()
+    //private var body_type: List<BodyType> = emptyList()
     private var carId: String? = null
     private var userId: String? = null
 
@@ -103,17 +91,22 @@ class GetCar : AppCompatActivity() {
             try {
                 val data = decodeList()   //вызов функции decodeList, которую передавали в параметрах
                 Log.d("GetCar","Загруженныу данные из $tableName: $data") //Логирование данных
-                withContext(Dispatchers.Main){  //переключение выполнения кода на главный поток для работы с интерфейсом
-                    val names = listOf("Выберите...") + data.map(getName)  //создание списка с одним элементом и со строкой "Выберите"
-                    Log.d("GetCar","Имена для Spinner'a: $names")  //Логирование списка имен
-                    val adapter = ArrayAdapter(this@GetCar, android.R.layout.simple_spinner_item, names)  //создаем адаптер который соеденяет данные с выпадающим списком
+                withContext(Dispatchers.Main) {  //переключение выполнения кода на главный поток для работы с интерфейсом
+                    val names =
+                        listOf("Выберите...") + data.map(getName)  //создание списка с одним элементом и со строкой "Выберите"
+                    Log.d("GetCar", "Имена для Spinner'a: $names")  //Логирование списка имен
+                    val adapter = ArrayAdapter(
+                        this@GetCar,
+                        android.R.layout.simple_spinner_item,
+                        names
+                    )  //создаем адаптер который соеденяет данные с выпадающим списком
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)  //указываем как будет выглядеть выпадающий список когда его раскроют
                     spinner.adapter = adapter  //присваиваем адаптер к списку
                     onDataLoaded(data) //Сохраняем данные в нужную переменную
                 }
             }catch (e: Exception){
                 Log.e("GetCar","Ошибка загрузки данных из $tableName: $errorMessage", e) //Логирование ошибки
-                withContext(Dispatchers.Main){
+                withContext(Dispatchers.Main) {
                     Toast.makeText(this@GetCar, errorMessage, Toast.LENGTH_SHORT).show()
                 }
             }
@@ -144,7 +137,7 @@ class GetCar : AppCompatActivity() {
                 errorMessage = "Ошибка загрузки города",
                 onDataLoaded = {city = it as List<City>}
             )
-            loadDataIntosSpinner(
+            /*loadDataIntosSpinner(
                 tableName = "Тип_кузова",
                 spinner = spinnerBody_type,
                 decodeList = {supabaseClient.from("Тип_кузова").select().decodeList<BodyType>()},
@@ -152,7 +145,7 @@ class GetCar : AppCompatActivity() {
                 errorMessage = "Ошибка загрузки типа кузова",
                 onDataLoaded = {body_type = it as List<BodyType>}
 
-            )
+            )*/
         }
 
         ButtonGetCar.setOnClickListener {
@@ -239,7 +232,11 @@ class GetCar : AppCompatActivity() {
                         .decodeList<CarData>()
                     if (existingCar.isNotEmpty()){
                         withContext(Dispatchers.Main) {
-                            Toast.makeText(this@GetCar,"АВтомомбиль с таким VIN уже существует", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@GetCar,
+                                "АВтомомбиль с таким VIN уже существует",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             ButtonGetCar.isEnabled = true
                         }
                         return@launch
@@ -248,14 +245,22 @@ class GetCar : AppCompatActivity() {
                     val carId = saveCar(Mark, Model, EORS, transmissionId, PODS, cityId, VIN, ownerId, Description)
                     withContext(Dispatchers.Main) {
                         if (carId != null) {
-                            Toast.makeText(this@GetCar, "Автомобиль успешно добавлен", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@GetCar,
+                                "Автомобиль успешно добавлен",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             // Переход в ImageCarActivity с car_id
                             val intent = Intent(this@GetCar, ImageCarActivity::class.java).apply {
                                 putExtra("car_id", carId)
                             }
                             startActivity(intent)
                         } else {
-                            Toast.makeText(this@GetCar, "Ошибка добавления автомобиля", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@GetCar,
+                                "Ошибка добавления автомобиля",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                         ButtonGetCar.isEnabled = true
 
@@ -297,7 +302,7 @@ class GetCar : AppCompatActivity() {
             val insertedLocation = supabaseClient.from("Местонахождение_автомобиля")
                 .select {
                     filter { eq("Город", CityId) }
-                    order("id", io.github.jan.supabase.postgrest.query.Order.DESCENDING)
+                    order("id", Order.DESCENDING)
                     limit(1)
                 }
                 .decodeSingle<CarLocation>()
@@ -332,7 +337,8 @@ class GetCar : AppCompatActivity() {
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
                 Log.e("GetCar", "Ошибка сохранения: ${e.message}", e)
-                Toast.makeText(this@GetCar, "Ошибка сохранения: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@GetCar, "Ошибка сохранения: ${e.message}", Toast.LENGTH_LONG)
+                    .show()
             }
             return null
         }
@@ -346,10 +352,12 @@ class GetCar : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     when {
                         result.isSuccess -> {
-                            Toast.makeText(this@GetCar, "Вы вышли из аккаунта", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@GetCar, "Вы вышли из аккаунта", Toast.LENGTH_SHORT)
+                                .show()
                             startActivity(Intent(this@GetCar, LoginActivity::class.java))
                             finish()
                         }
+
                         result.isFailure -> {
                             Toast.makeText(this@GetCar, "Ошибка выхода", Toast.LENGTH_SHORT).show()
                         }

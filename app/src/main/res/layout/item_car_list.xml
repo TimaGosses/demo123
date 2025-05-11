@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageCar"
+        android:layout_width="374dp"
+        android:layout_height="210dp"
+        android:layout_marginTop="50dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/placeholder_car" />
+
+    <TextView
+        android:id="@+id/textMark"
+        android:layout_width="112dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="20dp"
+        android:text="Kia"
+        android:textColor="#0923FF"
+        android:textSize="25sp"
+        app:layout_constraintEnd_toStartOf="@+id/textModel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageCar" />
+
+    <TextView
+        android:id="@+id/textModel"
+        android:layout_width="112dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="20dp"
+        android:text="Rio"
+        android:textColor="#0923FF"
+        android:textSize="25sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageCar" />
+
+    <TextView
+        android:id="@+id/textPrice"
+        android:layout_width="161dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="28dp"
+        android:text="2000р / сутки"
+        android:textSize="25sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.158"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textModel" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
