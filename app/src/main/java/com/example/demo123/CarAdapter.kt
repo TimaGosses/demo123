@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -43,48 +44,48 @@ class CarAdapter(
         Log.d("CarAdapter","Для автомобиля ${car.Марка}, ${car.Модель} imageurl = ${imageUrl}, тип: ${imageUrl?.javaClass?.simpleName}")
 
         holder.carImage?.let {
-           if (imageUrl != null && imageUrl is String) {
-               Glide.with(holder.itemView.context)
-                   .load(imageUrl)
-                   .placeholder(R.drawable.placeholder_car)
-                   .error(R.drawable.placeholder_car)
-                   .diskCacheStrategy(DiskCacheStrategy.ALL)
-                   .listener(object : RequestListener<Drawable> {
-                       override fun onLoadFailed(
-                           e: GlideException?,
-                           model: Any?,
-                           target: Target<Drawable?>,
-                           isFirstResource: Boolean
-                       ): Boolean {
-                           Log.d(
-                               "CarAdapter",
-                               "Ошибка загрузки изображений для ${car.Марка}, ${car.Модель}, ${e?.message}"
-                           )
-                           return false
-                       }
+            if (imageUrl != null && imageUrl is String) {
+                Glide.with(holder.itemView.context)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.placeholder_car)
+                    .error(R.drawable.placeholder_car)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .listener(object : RequestListener<Drawable> {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable?>,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            Log.d(
+                                "CarAdapter",
+                                "Ошибка загрузки изображений для ${car.Марка}, ${car.Модель}, ${e?.message}"
+                            )
+                            return false
+                        }
 
-                       override fun onResourceReady(
-                           resource: Drawable,
-                           model: Any,
-                           target: Target<Drawable?>?,
-                           dataSource: DataSource,
-                           isFirstResource: Boolean
-                       ): Boolean {
-                           Log.d(
-                               "CarAdapter",
-                               "Изображение успешно загруженно для ${car.Марка}, ${car.Модель}: $model "
-                           )
-                           return false
-                       }
-                   })
-                   .into(it)
-           }else {
-               //если imageUel не строка или null, показываем заглушку
-               Log.e("CarAdapter","Некорректный imageUrl для ${car.Марка}, ${car.Модель}: ${imageUrl}")
-               Glide.with(holder.itemView.context)
-                   .load(R.drawable.placeholder_car)
-                   .into(it)
-           }
+                        override fun onResourceReady(
+                            resource: Drawable,
+                            model: Any,
+                            target: Target<Drawable?>?,
+                            dataSource: DataSource,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            Log.d(
+                                "CarAdapter",
+                                "Изображение успешно загруженно для ${car.Марка}, ${car.Модель}: $model "
+                            )
+                            return false
+                        }
+                    })
+                    .into(it)
+            }else {
+                //если imageUel не строка или null, показываем заглушку
+                Log.e("CarAdapter","Некорректный imageUrl для ${car.Марка}, ${car.Модель}: ${imageUrl}")
+                Glide.with(holder.itemView.context)
+                    .load(R.drawable.placeholder_car)
+                    .into(it)
+            }
         }
         holder.itemView.setOnClickListener { onItemClick(car) }
     }

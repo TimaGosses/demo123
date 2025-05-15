@@ -43,7 +43,7 @@ class AuthManager(
 
     }
     //Вход  в систему
-    suspend fun login(email: String, password: String): Result<Unit> {
+        suspend fun login(email: String, password: String): Result<Unit> {
         return try {
             // Выполняем вход с помощью Email-провайдера
              authClient.signInWith(Email) {  //Регистрация с помощью supabase Auth

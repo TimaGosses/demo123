@@ -48,9 +48,7 @@ dependencies {
 
     implementation("io.coil-kt.coil3:coil-compose:3.1.0") //Photo Picker
     implementation("androidx.activity:activity-compose:1.10.1")
-
     implementation ("com.github.bumptech.glide:glide:5.0.0-rc01")
-
     implementation("io.github.jan-tennert.supabase:postgrest-kt:3.1.3")
     implementation("io.github.jan-tennert.supabase:storage-kt:3.1.4")
     implementation ("androidx.security:security-crypto:1.0.0")
@@ -59,9 +57,6 @@ dependencies {
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("io.ktor:ktor-client-cio:3.1.1")
     implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json")
-
-
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

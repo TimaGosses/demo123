@@ -6,6 +6,8 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -26,9 +28,9 @@ import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.hours
 
 private lateinit var recycleView: RecyclerView
-    private lateinit var carAdapter: CarAdapter
-    private var carList = mutableListOf<Car>()
-    private lateinit var binding: ActivityListCarBinding
+private lateinit var carAdapter: CarAdapter
+private var carList = mutableListOf<Car>()
+private lateinit var binding: ActivityListCarBinding
 
 class ListCar : AppCompatActivity() {
 
@@ -137,6 +139,3 @@ class ListCar : AppCompatActivity() {
         }
     }
 }
-
-
-

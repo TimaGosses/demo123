@@ -36,5 +36,11 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/carRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="690dp" />
+
+    <!--<Button
+        android:id="@+id/buttonCarsGet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Добавить автомомбиль" /> -->
 </LinearLayout>
