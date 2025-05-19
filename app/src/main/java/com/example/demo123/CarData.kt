@@ -1,4 +1,5 @@
 package com.example.demo123
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Contextual
 import java.util.UUID
@@ -29,9 +30,24 @@ data class City(
     val Регион: Int
 )
 @Serializable
+data class BodyType(
+    val id: Int,
+    val Название: String
+)
+@Serializable
 data class Region(
     val id: Int,
     val Название: String
+)
+@Serializable
+data class Brand(
+    val id: Int,
+    val Марка: String
+)
+@Serializable
+data class Price(
+    val id: Int,
+    val Цена_за_сутки: String
 )
 @Serializable
 data class CarLocation(
@@ -75,9 +91,20 @@ data class Car(
     val Владелец: String
 )
 @Serializable
-data class CarImageS(
+data class CarList( //трогать нельзя
     val car_id: String,
-    val image_url: String
+    val Марка: String,
+    val Цена_за_сутки: Int,
+    val Описание: String,
+    val Владелец: String,
+    val Год_выпуска: Int,
+    val VIN: String,
+    val Модель: String,
+    val Коробка_передач: Int,
+    val Местоположение: Int,
+    val Тип_кузова: Int,
+    val imagePath: String? = null, //путь к фото
+    val updated_at: String
 )
 @Serializable
 data class CarLists(

@@ -8,35 +8,67 @@
     <!-- Фильтры -->
 
     <!-- Список объявлений -->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="10dp">
+        android:padding="10dp"
+        android:layout_marginTop="30dp">
 
-        <Spinner
-            android:id="@+id/spinnerBrand"
-            android:layout_width="0dp"
+        <EditText
+            android:id="@+id/editTextSearch"
+            android:layout_width="274dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="Поиск"
+            android:inputType="text" />
 
-        <Spinner
-            android:id="@+id/spinnerPrice"
-            android:layout_width="0dp"
+        <Button
+            android:id="@+id/buttonSearch"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <Spinner
-            android:id="@+id/spinnerBodyType"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:text="Поиск" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/carRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="690dp" />
+        android:layout_height="577dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:background="#1C2526"
+        android:layout_marginTop="30dp">
+
+        <Button
+            android:id="@+id/buttonGetCarList"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Добавить авто" />
+
+        <Button
+            android:id="@+id/buttonRegister"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Button" />
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Button" />
+
+    </LinearLayout>
 
     <!--<Button
         android:id="@+id/buttonCarsGet"

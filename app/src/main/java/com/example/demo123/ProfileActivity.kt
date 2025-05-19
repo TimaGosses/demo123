@@ -26,6 +26,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var editTextOtch: EditText
     private lateinit var editTextPassport: EditText
     private lateinit var editTextVY: EditText
+    private lateinit var editTextPhone: EditText
     private lateinit var buttonGet: Button
     private lateinit var buttonGetC: Button //Добавление автомобиля
 
@@ -33,17 +34,14 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_profile)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+
         editTextFamily = findViewById(R.id.editTextFamily)  //привязка переменной и объекта на странице
         editTextName = findViewById(R.id.editTextName)
         editTextOtch = findViewById(R.id.editTextOtch)
         editTextPassport = findViewById(R.id.editTextPassport)
         editTextVY = findViewById(R.id.editTextVY)
         buttonGet = findViewById(R.id.buttonGet)
+        editTextPhone = findViewById(R.id.editTextPhone)
         buttonGetC = findViewById(R.id.buttonGetC)
         val getData = buttonGet
 
@@ -61,6 +59,7 @@ class ProfileActivity : AppCompatActivity() {
         val Name = editTextName.text.toString().trim()
         val Otch = editTextOtch.text.toString().trim()
         val PassportS = editTextPassport.text.toString().trim()
+        val Phone = editTextPhone.text.toString().trim()
         val VYS = editTextVY.text.toString().trim()
 
         Log.e("ProfileActivity", "PassportS: '$PassportS', VYS: '$VYS' ")
@@ -69,7 +68,7 @@ class ProfileActivity : AppCompatActivity() {
                 val Passport = PassportS.toLongOrNull()
                 val VY = VYS.toLongOrNull()
                 if (Passport != null && VY != null) { // Проверяем, что преобразование прошло успешно (не null)
-                    saveSupabase(Family, Name, Otch, Passport, VY)
+                    saveSupabase(Family, Name, Otch, Passport, VY, Phone)
                 } else {
                     Toast.makeText(this@ProfileActivity, "Поля Паспорт и В/У должны быть числами", Toast.LENGTH_SHORT).show()
                     return
@@ -80,7 +79,7 @@ class ProfileActivity : AppCompatActivity() {
                 return
             }
             }
-    fun saveSupabase(Family: String, Name: String, Otch: String, Passport: Long, VY: Long){  //функция сохранения данных в БД
+    fun saveSupabase(Family: String, Name: String, Otch: String, Passport: Long, VY: Long, Phone: String){  //функция сохранения данных в БД
         val supabaseClient = (application as MyApplication).supabase  //подключение к supabase
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -89,7 +88,8 @@ class ProfileActivity : AppCompatActivity() {
                     Name = Name,
                     Middle_name = Otch,
                     Passport = Passport,
-                    Number_VY = VY
+                    Number_VY = VY,
+                    Phone = Phone
                 )
                 supabaseClient.from("Пользователь").insert(userData)  //сохранение данных в БД
                 withContext(Dispatchers.Main){

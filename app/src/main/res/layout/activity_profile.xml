@@ -1,100 +1,179 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfileActivity">
+    android:background="#1C2526"
+    android:fillViewport="true"
+    android:clipToPadding="false">
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:text="Заполните свои данные"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:paddingTop="60dp"> <!-- Отступ сверху для статус-бара -->
 
-    <EditText
-        android:id="@+id/editTextFamily"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:hint="Фамилия"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        <!-- Заголовок -->
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Заполните свои данные"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"
+            android:paddingTop="35dp"/>
 
-    <EditText
-        android:id="@+id/editTextName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:ems="10"
-        android:hint="Имя"
-        android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextFamily" />
+        <!-- Поле Фамилия -->
+        <EditText
+            android:id="@+id/editTextFamily"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/rounded_edittext_background"
+            android:ems="10"
+            android:hint="Фамилия"
+            android:inputType="textPersonName"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B0B0B0"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_marginBottom="16dp" />
 
-    <EditText
-        android:id="@+id/editTextOtch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:ems="10"
-        android:hint="Отчество"
-        android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextName" />
+        <!-- Поле Имя -->
+        <EditText
+            android:id="@+id/editTextName"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/rounded_edittext_background"
+            android:ems="10"
+            android:hint="Имя"
+            android:inputType="textPersonName"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B0B0B0"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_marginBottom="16dp" />
 
-    <EditText
-        android:id="@+id/editTextPassport"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:ems="10"
-        android:hint="Паспортные данные"
-        android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextOtch" />
+        <!-- Поле Отчество -->
+        <EditText
+            android:id="@+id/editTextOtch"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/rounded_edittext_background"
+            android:ems="10"
+            android:hint="Отчество"
+            android:inputType="textPersonName"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B0B0B0"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_marginBottom="16dp" />
 
-    <EditText
-        android:id="@+id/editTextVY"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:ems="10"
-        android:hint="Номер ВУ"
-        android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextPassport" />
+        <!-- Поле Паспортные данные -->
+        <EditText
+            android:id="@+id/editTextPassport"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/rounded_edittext_background"
+            android:ems="10"
+            android:hint="Паспортные данные"
+            android:inputType="text"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B0B0B0"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_marginBottom="16dp" />
 
-    <Button
-        android:id="@+id/buttonGet"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:text="Внести данные"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextVY" />
+        <!-- Поле Номер ВУ -->
+        <EditText
+            android:id="@+id/editTextVY"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/rounded_edittext_background"
+            android:ems="10"
+            android:hint="Номер ВУ"
+            android:inputType="text"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B0B0B0"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_marginBottom="16dp" />
+        <!-- Поле Email -->
+        <EditText
+            android:id="@+id/editTextEmail"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/rounded_edittext_background"
+            android:ems="10"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B0B0B0"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_marginBottom="16dp" />
 
-    <Button
-        android:id="@+id/buttonGetC"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:text="Добавить автомобиль"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonGet" />
+        <!-- Поле Телефон -->
+        <EditText
+            android:id="@+id/editTextPhone"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/rounded_edittext_background"
+            android:ems="10"
+            android:hint="Телефон (+7(XXX)-XXX-XX-XX)"
+            android:inputType="phone"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B0B0B0"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_marginBottom="16dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Поле Адрес -->
+        <EditText
+            android:id="@+id/editTextAddress"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/rounded_edittext_background"
+            android:ems="10"
+            android:hint="Адрес"
+            android:inputType="textPostalAddress"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B0B0B0"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Кнопка Внести данные -->
+        <Button
+            android:id="@+id/buttonGet"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:backgroundTint="#00C4B4"
+            android:text="Внести данные"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Кнопка Добавить автомобиль -->
+        <Button
+            android:id="@+id/buttonGetC"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:backgroundTint="#00C4B4"
+            android:text="Добавить автомобиль"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:layout_marginBottom="48dp" /> <!-- Дополнительный отступ снизу -->
+
+        <!-- Дополнительное пространство для проверки прокрутки -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="200dp" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

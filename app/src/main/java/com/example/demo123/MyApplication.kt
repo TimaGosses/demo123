@@ -10,6 +10,8 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
+import io.ktor.client.engine.cio.CIO
+import io.ktor.network.sockets.aSocket
 
 class MyApplication : Application() {
     lateinit var supabase: SupabaseClient
@@ -43,10 +45,15 @@ class MyApplication : Application() {
             supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3a3FydGN2c3V3b3lyYmxldWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwNjc0MDYsImV4cCI6MjA1NTY0MzQwNn0.7v4fKtjArOa5PQSFakKtlQ7YI5UJb4Ju5Mf9rmnu8ew" // Твой anon key
         ) {
             install(Postgrest)
-            install(Auth)
+            install(Auth) {
+                autoLoadFromStorage = true //Автоматически загружать сессию из хранилища
+                alwaysAutoRefresh = true //Автоматически обновлять токен
+            }
             install(Storage)
-
-
+            httpEngine = CIO.create {
+                requestTimeout = 30000 // 30 секунд
+                maxConnectionsCount = 30000 // 30 секунд
+            }
         }
     }
 }

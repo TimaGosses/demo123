@@ -41,7 +41,7 @@ class GetCar : AppCompatActivity() {
     private var city: List<City> = emptyList()
     private var region: List<Region> = emptyList()
     private var filteredLocations: List<City> = emptyList()
-    //private var body_type: List<BodyType> = emptyList()
+    private var body_type: List<BodyType> = emptyList()
     private var carId: String? = null
     private var userId: String? = null
 
@@ -90,7 +90,7 @@ class GetCar : AppCompatActivity() {
             val supabaseClient = (application as MyApplication).supabase
             try {
                 val data = decodeList()   //вызов функции decodeList, которую передавали в параметрах
-                Log.d("GetCar","Загруженныу данные из $tableName: $data") //Логирование данных
+                Log.d("GetCar","Загруженны данные из $tableName: $data") //Логирование данных
                 withContext(Dispatchers.Main) {  //переключение выполнения кода на главный поток для работы с интерфейсом
                     val names =
                         listOf("Выберите...") + data.map(getName)  //создание списка с одним элементом и со строкой "Выберите"
@@ -137,7 +137,7 @@ class GetCar : AppCompatActivity() {
                 errorMessage = "Ошибка загрузки города",
                 onDataLoaded = {city = it as List<City>}
             )
-            /*loadDataIntosSpinner(
+            loadDataIntosSpinner(
                 tableName = "Тип_кузова",
                 spinner = spinnerBody_type,
                 decodeList = {supabaseClient.from("Тип_кузова").select().decodeList<BodyType>()},
@@ -145,7 +145,7 @@ class GetCar : AppCompatActivity() {
                 errorMessage = "Ошибка загрузки типа кузова",
                 onDataLoaded = {body_type = it as List<BodyType>}
 
-            )*/
+            )
         }
 
         ButtonGetCar.setOnClickListener {

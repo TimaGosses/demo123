@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     kotlin("plugin.serialization") version "2.1.0"
 
+
 }
 
 
@@ -10,6 +11,7 @@ plugins {
 android {
     namespace = "com.example.demo123"
     compileSdk = 35
+
 
     buildFeatures {
         viewBinding = true
@@ -21,6 +23,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -40,6 +43,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+
     }
 }
 
@@ -57,6 +61,9 @@ dependencies {
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("io.ktor:ktor-client-cio:3.1.1")
     implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json")
+    implementation ("androidx.room:room-runtime:2.6.1")
+    implementation ("androidx.room:room-ktx:2.6.1")
+    implementation ("com.google.code.gson:gson:2.13.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

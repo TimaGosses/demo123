@@ -7,5 +7,6 @@ data class UserData(
     val Name: String,
     val Middle_name: String,
     val Passport: Long,
-    val Number_VY: Long
+    val Number_VY: Long,
+    val Phone: String
 )
