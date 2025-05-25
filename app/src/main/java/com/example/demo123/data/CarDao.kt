@@ -4,19 +4,28 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.demo123.data.CarEntity
 import kotlinx.coroutines.flow.Flow
 
+
+//Интерфейс для работы с таблицей
 @Dao
 interface CarDao {
-    @Query("SELECT * FROM Машина")
-    fun getAllCars(): Flow<List<CarEntity>>
-
-    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCars(cars: List<CarEntity>)
 
-    @Query("DELETE FROM Машина")
+    @Query("SELECT * FROM car_table")
+    fun getAllCars(): Flow<List<CarEntity>>
+
+    @Query("SELECT * FROM car_table WHERE LOWER(Марка) LIKE :query OR LOWER(Модель) LIKE :query")
+    fun searсhCars(query: String): Flow<List<CarEntity>>
+
+    @Query("SELECT updated_at FROM car_table ORDER BY updated_at DESC LIMIT 1")
+    suspend fun getlastUpdateTime(): String?
+
+    @Query("DELETE FROM car_table")
     suspend fun deleteallCars()
 
-    @Query("SELECT MAX(created_at) FROM Машина")
-    suspend fun getlastUpdateTime(): String?
+    @Query("SELECT * FROM car_table")
+    suspend fun logCars(): List<CarEntity>
 }

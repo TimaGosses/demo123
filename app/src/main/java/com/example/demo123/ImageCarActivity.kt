@@ -50,6 +50,7 @@ import kotlinx.coroutines.withContext
 import okio.IOException
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.IllegalArgumentException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -188,17 +189,10 @@ class ImageCarActivity : AppCompatActivity() {
             return
         }
 
-        val startTime = System.currentTimeMillis()
         Log.d("ImageCarActivity","Начало takePhoto")
 
         // Intent для съемки фото
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            //добавление категории и типа для повышения совместимости
-            addCategory(Intent.CATEGORY_DEFAULT)
-            type = "image/*"
-            setPackage("com.google.android.GoogleCamera")
-        }
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         Log.d("ImageCarActivity", "Создан Intent для камеры: $intent")
 
         // Проверка доступности камеры через PackageManager
@@ -210,9 +204,8 @@ class ImageCarActivity : AppCompatActivity() {
         }
 
         // Проверка наличия приложений для камеры
-        val activitiesStart = System.currentTimeMillis()
         val activities = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
-        Log.d("ImageCarActivity", "Поиск приложений для камеры занял ${System.currentTimeMillis() - activitiesStart} мс")
+        Log.d("ImageCarActivity", "Поиск приложений для камеры занял ${System.currentTimeMillis()} мс")
         Log.d("ImageCarActivity", "Найдено приложений для камеры: ${activities.size}")
         activities.forEach { activity ->
             Log.d("ImageCarActivity", "Доступное приложение: ${activity.activityInfo.packageName}")
@@ -241,20 +234,23 @@ class ImageCarActivity : AppCompatActivity() {
 
                 photoFile?.let {
                     tempPhotoFile = it
-                    val photoUri = FileProvider.getUriForFile(this@ImageCarActivity, "${packageName}.fileprovider", it)
-                    Log.d("ImageCarActivity", "Получен Uri через FileProvider: $photoUri")
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                    startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+                    try {
+                        val photoUri = FileProvider.getUriForFile(this@ImageCarActivity, "${packageName}.fileprovider", it)
+                        Log.d("ImageCarActivity", "Получен Uri через FileProvider: $photoUri")
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+                    }catch (e: IllegalArgumentException){
+                        Log.e("ImageCarActivity","Ошибка FileProvider: ${e.message}", e)
+                        Toast.makeText(this@ImageCarActivity,"Ошибка настройки камеры",Toast.LENGTH_SHORT).show()
+                    }
                 } ?: run {
                     Toast.makeText(
-                        this@ImageCarActivity,
-                        "Не удалось создать файл для фото",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                        this@ImageCarActivity,"Не удалось создать файл для фото",Toast.LENGTH_SHORT).show()
                 }
             }
         } else {
-            Toast.makeText(this@ImageCarActivity, "Камера не доступна", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@ImageCarActivity, "Приложение камеры не найдено", Toast.LENGTH_SHORT).show()
         }
     }
     //Обрабатывает результаты выбора или съемки
@@ -348,7 +344,7 @@ class ImageCarActivity : AppCompatActivity() {
                         "image_url" to publicUrl,
                         "user_id" to userId
                     )
-                    supabaseClient.from("Изображение автомобиля").insert(carImage)
+                    supabaseClient.from("Изображение_автомобиля").insert(carImage)
                     Log.d("ImageCarActivity","Запись добавлена в таблицу изображение автомобиля: $carImage")
                 }
                 Toast.makeText(this@ImageCarActivity, "Изображения загружены", Toast.LENGTH_SHORT).show()
@@ -368,8 +364,14 @@ class ImageCarActivity : AppCompatActivity() {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         // Получаем директорию Pictures в приватном хранилище приложения
         val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        if (storageDir == null || !storageDir.exists()){
+            storageDir?.mkdirs() ?: throw IOException("Не удалось создать директорию: $storageDir")
+            Log.d("ImageCarActivity","Создана дериктория $storageDir")
+        }
+        val file = File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+        Log.d("ImageCarActivity","Создаем временный файл ${file.absoluteFile}")
         // Создаем временный файл с префиксом JPEG_ и расширением .jpg
-        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+        return file
     }
 
     // Константы для идентификации запросов

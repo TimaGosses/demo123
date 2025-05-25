@@ -1,5 +1,6 @@
 package com.example.demo123
 import androidx.room.PrimaryKey
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Contextual
 import java.util.UUID
@@ -91,22 +92,6 @@ data class Car(
     val Владелец: String
 )
 @Serializable
-data class CarList( //трогать нельзя
-    val car_id: String,
-    val Марка: String,
-    val Цена_за_сутки: Int,
-    val Описание: String,
-    val Владелец: String,
-    val Год_выпуска: Int,
-    val VIN: String,
-    val Модель: String,
-    val Коробка_передач: Int,
-    val Местоположение: Int,
-    val Тип_кузова: Int,
-    val imagePath: String? = null, //путь к фото
-    val updated_at: String
-)
-@Serializable
 data class CarLists(
     val car_id: String,
     val Марка: String,
@@ -117,7 +102,9 @@ data class CarLists(
     val Местоположение: Int,
     val imageUrls: List<String>,
     val Владелец: String,
-    val Описание: String
+    val Описание: String,
+    val Доступность: Boolean?,
+    val updated_at: LocalDateTime
 )
 @Serializable
 data class CarRaw(
@@ -131,7 +118,7 @@ data class CarRaw(
     val image_url: String,
     val Владелец: String,
     val Тип_кузова: Int,
-    val Доступность: Boolean,
+    val Доступность: Boolean?,
     val Описание: String? = null
 )
 @Serializable
@@ -149,8 +136,10 @@ data class CarSupabaseRaw(
     @SerialName("Местоположение") val Местоположение: Int,
     @SerialName("Владелец") val Владелец: String,
     @SerialName("Тип_кузова") val Тип_кузова: Int,
-    @SerialName("Доступность") val Доступность: Boolean,
+    @SerialName("Доступность") val Доступность: Boolean?,
     @SerialName("Описание") val Описание: String? = null,
+    @SerialName("updated_at") val updated_at: LocalDateTime,
+
 
     // ЭТОТ ПОЛЕ СООТВЕТСТВУЕТ ВЛОЖЕННЫМ ДАННЫМ ОТ select(..., Изображение_автомобиля(...))
     // @SerialName ДОЛЖЕН СОВПАДАТЬ С ИМЕНЕМ СВЯЗИ В БАЗЕ ("Изображение_автомобиля")

@@ -2,6 +2,7 @@ package com.example.demo123
 
 import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import io.github.jan.supabase.SupabaseClient
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import java.util.UUID
 import kotlin.jvm.java
+
 
 data class Profile(val id: String, val name: String, val phone: String)
 data class CarImage(val id: String, val user_id: String, val car_id: String, val image_url: String)
@@ -138,4 +140,17 @@ class AuthManager(
             Result.failure(e)
         }
     }
+    suspend fun checkAuth(): Boolean {
+        return getCurrentUser() != null
+    }
+    fun redirectToLogin(context: Context){
+        val intent = Intent(context, LoginActivity::class.java)
+        context.startActivity(intent)
+        if (context is android.app.Activity) context.finish()
+    }
+    data class Profile(
+         val id: String,
+         val name: String,
+         val phone: String
+    )
 }

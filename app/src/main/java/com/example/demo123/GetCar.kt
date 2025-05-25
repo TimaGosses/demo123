@@ -71,12 +71,17 @@ class GetCar : AppCompatActivity() {
 
         val supabaseClient = (application as MyApplication).supabase   //Подключение к Supabase
         val user = supabaseClient.auth.currentUserOrNull()
-        val userId = user?.id
+        Log.d("GetCar","ЯПолучен ${user}")
+        if (user == null){
+            Toast.makeText(this@GetCar,"Пользователь не авторизован", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this@GetCar, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
         savedInstanceState?.let {
             val carId = it.getString("car_id")
-            if (carId != null){
-                buttonGetImage.isEnabled = true
-            }
+            Log.d("GetCar","Восстанавливаем carId: ${carId}")
         }
 
         suspend fun <T : Any> loadDataIntosSpinner(  //Асинхронная функция(работает в фоновом режиме) для отображения и выбора данных для спиннеров
@@ -150,19 +155,6 @@ class GetCar : AppCompatActivity() {
 
         ButtonGetCar.setOnClickListener {
             newCar()
-        }
-        buttonGetImage.setOnClickListener {
-            /* val userId = supabaseClient.auth.currentUserOrNull()?.id ?: run {
-                 Toast.makeText(this@GetCar,"Пользователь не авторизован", Toast.LENGTH_SHORT).show()
-                 return@setOnClickListener
-             }*/
-            val intent = Intent(this@GetCar, ImageCarActivity::class.java).apply {
-                putExtra("car_id",carId)
-                putExtra("user_id",userId) //передача user_id и car_id в ImageCarActivity
-            }
-            //intent.putExtra("user_id", userId)
-
-            startActivity(intent)
         }
 
     }
@@ -245,25 +237,16 @@ class GetCar : AppCompatActivity() {
                     val carId = saveCar(Mark, Model, EORS, transmissionId, PODS, cityId, VIN, ownerId, Description)
                     withContext(Dispatchers.Main) {
                         if (carId != null) {
-                            Toast.makeText(
-                                this@GetCar,
-                                "Автомобиль успешно добавлен",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(this@GetCar,"Автомобиль успешно добавлен",Toast.LENGTH_SHORT).show()
                             // Переход в ImageCarActivity с car_id
                             val intent = Intent(this@GetCar, ImageCarActivity::class.java).apply {
                                 putExtra("car_id", carId)
                             }
                             startActivity(intent)
                         } else {
-                            Toast.makeText(
-                                this@GetCar,
-                                "Ошибка добавления автомобиля",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(this@GetCar,"Ошибка добавления автомобиля",Toast.LENGTH_SHORT).show()
+                            ButtonGetCar.isEnabled = true
                         }
-                        ButtonGetCar.isEnabled = true
-
                     }
 
                 }catch (e: Exception){
@@ -272,10 +255,6 @@ class GetCar : AppCompatActivity() {
                     ButtonGetCar.isEnabled = true
                 }
             }
-
-
-
-
         }
 
     }
