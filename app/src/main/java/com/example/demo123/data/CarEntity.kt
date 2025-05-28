@@ -12,7 +12,7 @@ import com.google.gson.reflect.TypeToken
 data class CarEntity (
     @PrimaryKey @ColumnInfo(name = "car_id") val car_id: String,
     @ColumnInfo(name = "Марка") val Марка: String,
-    @ColumnInfo(name = "Цена_за_сутк") val Цена_за_сутки: Int,
+    @ColumnInfo(name = "Цена_за_сутки") val Цена_за_сутки: Int,
     @ColumnInfo(name = "Описание") val Описание: String,
     @ColumnInfo(name = "Владелец") val Владелец: String,
     @ColumnInfo(name = "Год_выпуска") val Год_выпуска: Int,
@@ -25,13 +25,3 @@ data class CarEntity (
     @ColumnInfo(name = "updated_at") val updated_at: String,
     )
 
-@TypeConverter
-fun fromStringList(value: List<String>): String {
-    return Gson().toJson(value)
-}
-
-@TypeConverter
-fun toStringList(value: String): List<String> {
-    val listType = object : TypeToken<List<String>>() {}.type
-    return Gson().fromJson(value, listType)
-}

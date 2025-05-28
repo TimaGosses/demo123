@@ -1,84 +1,112 @@
 package com.example.demo123.models
 
-import android.content.Context
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.demo123.AuthManager
 import com.example.demo123.CarLists
+
+import android.content.Context
+import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.demo123.data.CarRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class ListCarViewModel(
     private val repository: CarRepository,
-    private val authManager: AuthManager
+    private val authManager: AuthManager,
+    private val context: Context
 ) : ViewModel() {
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    // Flow для всех автомобилей (без поиска)
-    val cars: Flow<List<CarLists>> = repository.getCachedCars()
+    private val _searchResults = MutableStateFlow<List<CarLists>>(emptyList())
+    val searchResults: StateFlow<List<CarLists>> = _searchResults.asStateFlow()
 
-    // StateFlow для хранения поискового запроса
-    private val searchQuery = MutableStateFlow("")
+    private val _errorFlow = MutableStateFlow<String?>(null)
+    val errorFlow: StateFlow<String?> = _errorFlow.asStateFlow()
 
-    // Flow для результатов поиска
-    val searchResults: Flow<List<CarLists>> = searchQuery.flatMapLatest { query ->
-        if (query.isEmpty()) {
-            repository.getCachedCars()
-        } else {
-            repository.searchCars(query)
-        }
-    }
-
-    // Flow для показа ошибок
-    private val _errorFlow = MutableSharedFlow<String>()
-    val errorFlow = _errorFlow.asSharedFlow()
-
-    // Flow для управления видимостью прогресс-бара
     private val _isLoading = MutableStateFlow(false)
-    val isLoading: Flow<Boolean> = _isLoading
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    // Flow для управления видимостью списка
     private val _isListVisible = MutableStateFlow(true)
-    val isListVisible: Flow<Boolean> = _isListVisible
+    val isListVisible: StateFlow<Boolean> = _isListVisible.asStateFlow()
 
-    // Flow для управления видимостью ошибки
     private val _isErrorVisible = MutableStateFlow(false)
-    val isErrorVisible: Flow<Boolean> = _isErrorVisible
+    val isErrorVisible: StateFlow<Boolean> = _isErrorVisible.asStateFlow()
 
     init {
-        // Проверяем авторизацию и загружаем данные при создании ViewModel
         checkAuthAndFetchData()
     }
 
-    // Проверка авторизации и загрузка данных
-    fun checkAuthAndFetchData(context: Context? = null) {
+    fun checkAuthAndFetchData() {
         viewModelScope.launch {
             if (authManager.checkAuth()) {
                 fetchCarsFromSupabase()
             } else {
-                _errorFlow.emit("Требуется авторизация")
-                context?.let { authManager.redirectToLogin(it) }
+                _errorFlow.value = "Требуется авторизация"
+                authManager.redirectToLogin(context)
+                _isErrorVisible.value = true
             }
         }
     }
 
-    // Загрузка данных из Supabase
     private suspend fun fetchCarsFromSupabase() {
         try {
             _isLoading.value = true
             _isListVisible.value = false
             _isErrorVisible.value = false
-            repository.syncWithSupabase()
+            repository.syncCars(context)
+            val cars = repository.getAllCarsRaw()
+            _searchResults.value = cars.map { carEntity ->
+                CarLists(
+                    car_id = carEntity.car_id,
+                    Марка = carEntity.Марка,
+                    Модель = carEntity.Модель,
+                    Коробка_передач = carEntity.Коробка_передач,
+                    Владелец = carEntity.Владелец,
+                    Цена_за_сутки = carEntity.Цена_за_сутки,
+                    Описание = carEntity.Описание,
+                    updated_at = carEntity.updated_at,
+                    Местоположение = carEntity.Местоположение,
+                    Тип_кузова = carEntity.Тип_кузова,
+                    Год_выпуска = carEntity.Год_выпуска,
+                    Доступность = carEntity.Доступность ?: false,
+                    imageUrls = carEntity.imageUrls
+                )
+            }.filter { car ->
+                car.Марка?.contains(_searchQuery.value, ignoreCase = true) ?: false ||
+                        car.Модель?.contains(_searchQuery.value, ignoreCase = true) ?: false
+            }
+            Log.d("ListCarViewModel", "Filtered cars: ${_searchResults.value.size}")
             _isListVisible.value = true
         } catch (e: Exception) {
-            _errorFlow.emit("Ошибка загрузки данных: ${e.message}")
-            val cachedCars = repository.getCachedCars().firstOrNull() ?: emptyList()
+            _errorFlow.value = "Ошибка загрузки данных: ${e.message}"
+            val cachedCars = repository.getAllCarsRaw()
             if (cachedCars.isNotEmpty()) {
+                _searchResults.value = cachedCars.map { carEntity ->
+                    CarLists(
+                        car_id = carEntity.car_id,
+                        Марка = carEntity.Марка,
+                        Модель = carEntity.Модель,
+                        Коробка_передач = carEntity.Коробка_передач,
+                        Владелец = carEntity.Владелец,
+                        Цена_за_сутки = carEntity.Цена_за_сутки,
+                        Описание = carEntity.Описание,
+                        updated_at = carEntity.updated_at,
+                        Местоположение = carEntity.Местоположение,
+                        Тип_кузова = carEntity.Тип_кузова,
+                        Год_выпуска = carEntity.Год_выпуска,
+                        Доступность = carEntity.Доступность ?: false,
+                        imageUrls = carEntity.imageUrls
+                    )
+                }.filter { car ->
+                    car.Марка?.contains(_searchQuery.value, ignoreCase = true) ?: false ||
+                            car.Модель?.contains(_searchQuery.value, ignoreCase = true) ?: false
+                }
                 _isListVisible.value = true
             } else {
                 _isErrorVisible.value = true
@@ -88,12 +116,33 @@ class ListCarViewModel(
         }
     }
 
-    // Обновление поискового запроса
     fun updateSearchQuery(query: String) {
-        searchQuery.value = query
+        _searchQuery.value = query
+        viewModelScope.launch {
+            val cars = repository.getAllCarsRaw()
+            _searchResults.value = cars.map { carEntity ->
+                CarLists(
+                    car_id = carEntity.car_id,
+                    Марка = carEntity.Марка,
+                    Модель = carEntity.Модель,
+                    Коробка_передач = carEntity.Коробка_передач,
+                    Владелец = carEntity.Владелец,
+                    Цена_за_сутки = carEntity.Цена_за_сутки,
+                    Описание = carEntity.Описание,
+                    updated_at = carEntity.updated_at,
+                    Местоположение = carEntity.Местоположение,
+                    Тип_кузова = carEntity.Тип_кузова,
+                    Год_выпуска = carEntity.Год_выпуска,
+                    Доступность = carEntity.Доступность ?: false,
+                    imageUrls = carEntity.imageUrls
+                )
+            }.filter { car ->
+                car.Марка?.contains(_searchQuery.value, ignoreCase = true) ?: false ||
+                        car.Модель?.contains(_searchQuery.value, ignoreCase = true) ?: false
+            }
+        }
     }
 
-    // Очистка кэша
     fun clearCache() {
         viewModelScope.launch {
             repository.clearCache()

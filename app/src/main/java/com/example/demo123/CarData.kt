@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Contextual
 import java.util.UUID
 import kotlinx.serialization.SerialName
+import java.math.BigDecimal
+import java.time.format.DateTimeFormatter
 
 @Serializable
 data class CarData( //трогать нельзя
@@ -104,7 +106,8 @@ data class CarLists(
     val Владелец: String,
     val Описание: String,
     val Доступность: Boolean?,
-    val updated_at: LocalDateTime
+    val updated_at: String,
+    val Тип_кузова: Int
 )
 @Serializable
 data class CarRaw(
@@ -127,7 +130,7 @@ data class EmbeddedCarImage( // Назвал его EmbeddedCarImage, чтобы
 )
 @Serializable
 data class CarSupabaseRaw(
-    val car_id: String,
+    @SerialName("car_id") val car_id: String,
     @SerialName("Марка") val Марка: String,
     @SerialName("Модель") val Модель: String,
     @SerialName("Год_выпуска") val Год_выпуска: Int,
@@ -137,12 +140,13 @@ data class CarSupabaseRaw(
     @SerialName("Владелец") val Владелец: String,
     @SerialName("Тип_кузова") val Тип_кузова: Int,
     @SerialName("Доступность") val Доступность: Boolean?,
-    @SerialName("Описание") val Описание: String? = null,
-    @SerialName("updated_at") val updated_at: LocalDateTime,
+    @SerialName("Описание") val Описание: String,
+    @SerialName("updated_at") val updated_at: String,
+    //val parsedDataTime = LocalDateTime.parse(updated_at, DateTimeFormatter.ISO_DATE_TIME)
 
 
     // ЭТОТ ПОЛЕ СООТВЕТСТВУЕТ ВЛОЖЕННЫМ ДАННЫМ ОТ select(..., Изображение_автомобиля(...))
     // @SerialName ДОЛЖЕН СОВПАДАТЬ С ИМЕНЕМ СВЯЗИ В БАЗЕ ("Изображение_автомобиля")
     // Тип должен быть List<Класс_для_вложенного_объекта> (то есть List<EmbeddedCarImage>)
-    @SerialName("Изображение_автомобиля") val images: List<EmbeddedCarImage> = emptyList()
+    @SerialName("Изображение_автомобиля") val images: List<String> = emptyList()
 )

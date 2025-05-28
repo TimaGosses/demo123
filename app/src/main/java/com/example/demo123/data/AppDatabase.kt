@@ -17,6 +17,23 @@ import com.google.gson.reflect.TypeToken
 abstract class AppDatabase : RoomDatabase() {
     abstract fun carDao(): CarDao
 
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getDatabase(context: android.content.Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = androidx.room.Room.databaseBuilder(
+                    context.applicationContext, AppDatabase::class.java, "car_rental_database"
+                ).build()
+                INSTANCE = instance
+                instance
+
+            }
+
+        }
+    }
+
 }
 
 class Converters {

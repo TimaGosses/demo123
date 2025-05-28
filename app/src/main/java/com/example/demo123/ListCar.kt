@@ -1,5 +1,6 @@
 package com.example.demo123
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +21,7 @@ import com.example.demo123.data.CarRepository
 import com.example.demo123.CarData
 import com.example.demo123.databinding.ActivityListCarBinding
 import com.example.demo123.models.ListCarViewModel
+import com.example.demo123.models.ListCarViewModelFactory
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -33,7 +36,7 @@ class ListCar : AppCompatActivity() {
     private lateinit var repository: CarRepository
     private lateinit var authManager: AuthManager
     private val viewModel: ListCarViewModel by viewModels {
-        ListCarViewModelFactory(application as MyApplication)
+        ListCarViewModelFactory(application as MyApplication, this)
     }
 
 
@@ -122,16 +125,4 @@ class ListCar : AppCompatActivity() {
         }
     }
 }
-class ListCarViewModelFactory(private val application: MyApplication) :
-        androidx.lifecycle.ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ListCarViewModel::class.java)){
-            @Suppress("UNCHECKED_CAST")
-            return ListCarViewModel(
-                CarRepository(application),
-                application.authManager
-            ) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}
+

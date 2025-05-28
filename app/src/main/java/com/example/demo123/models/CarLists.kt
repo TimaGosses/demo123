@@ -17,7 +17,6 @@ data class CarList( //трогать нельзя
     val Коробка_передач: Int,
     val Местоположение: Int,
     val Тип_кузова: Int,
-    val Доступность: Boolean?,
     val imageUrls: List<String>, //путь к фото
     @Contextual val updated_at: LocalDateTime
 )
