@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 
-class CarRepository(private val app: MyApplication){
+/*class CarRepository(private val app: MyApplication){
     suspend fun getCar(): List<Car> = withContext(Dispatchers.IO) {
         try {
             val carResponse = app.supabase.postgrest["Машина"]
@@ -41,4 +41,4 @@ class CarRepository(private val app: MyApplication){
         }
 
     }
-}
+}*/

@@ -1,30 +1,35 @@
 package com.example.demo123.models
 
-import com.example.demo123.AuthManager
-import com.example.demo123.CarLists
-
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.Query
+import com.example.demo123.AuthManager
+import com.example.demo123.CarLists
 import com.example.demo123.data.CarRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
-class ListCarViewModel(
+class ListCarViewModel constructor(
     private val repository: CarRepository,
     private val authManager: AuthManager,
     private val context: Context
 ) : ViewModel() {
+
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _searchResults = MutableStateFlow<List<CarLists>>(emptyList())
-    val searchResults: StateFlow<List<CarLists>> = _searchResults.asStateFlow()
+    private val _searchResult = MutableStateFlow<List<CarLists>>(emptyList())
+    val searchResult: StateFlow<List<CarLists>> = _searchResult.asStateFlow()
 
     private val _errorFlow = MutableStateFlow<String?>(null)
     val errorFlow: StateFlow<String?> = _errorFlow.asStateFlow()
@@ -32,21 +37,35 @@ class ListCarViewModel(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val _isListVisible = MutableStateFlow(true)
+    private val _isListVisible= MutableStateFlow(true)
     val isListVisible: StateFlow<Boolean> = _isListVisible.asStateFlow()
 
-    private val _isErrorVisible = MutableStateFlow(false)
+    private val _isErrorVisible = MutableStateFlow(false )
     val isErrorVisible: StateFlow<Boolean> = _isErrorVisible.asStateFlow()
 
+
+    private val _cars = MutableStateFlow<List<CarLists>>(emptyList())
+    val cars: StateFlow<List<CarLists>> = _cars.asStateFlow()
+    val allCars: Flow<List<CarLists>> = repository.getAllCars()
+
     init {
+        //подписываемя на данные репозитория
+        viewModelScope.launch {
+            repository.getAllCarsFlow().collect { cars ->
+                _searchResult.value = cars.filter { car ->
+                    car.Марка.contains(_searchQuery.value, ignoreCase = true)
+                }
+                Log.d("CarListViewModel","Фильтр машин: ${_searchResult.value.size}")
+            }
+
+        }
         checkAuthAndFetchData()
     }
-
-    fun checkAuthAndFetchData() {
+    fun checkAuthAndFetchData(){
         viewModelScope.launch {
-            if (authManager.checkAuth()) {
+            if (authManager.checkAuth()){
                 fetchCarsFromSupabase()
-            } else {
+            }else {
                 _errorFlow.value = "Требуется авторизация"
                 authManager.redirectToLogin(context)
                 _isErrorVisible.value = true
@@ -54,61 +73,19 @@ class ListCarViewModel(
         }
     }
 
-    private suspend fun fetchCarsFromSupabase() {
+    private suspend fun fetchCarsFromSupabase(){
         try {
             _isLoading.value = true
-            _isListVisible.value = false
+            _isListVisible.value = true
             _isErrorVisible.value = false
             repository.syncCars(context)
-            val cars = repository.getAllCarsRaw()
-            _searchResults.value = cars.map { carEntity ->
-                CarLists(
-                    car_id = carEntity.car_id,
-                    Марка = carEntity.Марка,
-                    Модель = carEntity.Модель,
-                    Коробка_передач = carEntity.Коробка_передач,
-                    Владелец = carEntity.Владелец,
-                    Цена_за_сутки = carEntity.Цена_за_сутки,
-                    Описание = carEntity.Описание,
-                    updated_at = carEntity.updated_at,
-                    Местоположение = carEntity.Местоположение,
-                    Тип_кузова = carEntity.Тип_кузова,
-                    Год_выпуска = carEntity.Год_выпуска,
-                    Доступность = carEntity.Доступность ?: false,
-                    imageUrls = carEntity.imageUrls
-                )
-            }.filter { car ->
-                car.Марка?.contains(_searchQuery.value, ignoreCase = true) ?: false ||
-                        car.Модель?.contains(_searchQuery.value, ignoreCase = true) ?: false
-            }
-            Log.d("ListCarViewModel", "Filtered cars: ${_searchResults.value.size}")
             _isListVisible.value = true
-        } catch (e: Exception) {
+        }catch (e: Exception){
             _errorFlow.value = "Ошибка загрузки данных: ${e.message}"
-            val cachedCars = repository.getAllCarsRaw()
+            val cachedCars = repository.getAllCarsFlow().firstOrNull() ?: emptyList()
             if (cachedCars.isNotEmpty()) {
-                _searchResults.value = cachedCars.map { carEntity ->
-                    CarLists(
-                        car_id = carEntity.car_id,
-                        Марка = carEntity.Марка,
-                        Модель = carEntity.Модель,
-                        Коробка_передач = carEntity.Коробка_передач,
-                        Владелец = carEntity.Владелец,
-                        Цена_за_сутки = carEntity.Цена_за_сутки,
-                        Описание = carEntity.Описание,
-                        updated_at = carEntity.updated_at,
-                        Местоположение = carEntity.Местоположение,
-                        Тип_кузова = carEntity.Тип_кузова,
-                        Год_выпуска = carEntity.Год_выпуска,
-                        Доступность = carEntity.Доступность ?: false,
-                        imageUrls = carEntity.imageUrls
-                    )
-                }.filter { car ->
-                    car.Марка?.contains(_searchQuery.value, ignoreCase = true) ?: false ||
-                            car.Модель?.contains(_searchQuery.value, ignoreCase = true) ?: false
-                }
                 _isListVisible.value = true
-            } else {
+            }else {
                 _isErrorVisible.value = true
             }
         } finally {
@@ -116,36 +93,20 @@ class ListCarViewModel(
         }
     }
 
-    fun updateSearchQuery(query: String) {
+    fun updateSearchQuery(query: String){
         _searchQuery.value = query
+    }
+
+    fun clearCache(){
         viewModelScope.launch {
-            val cars = repository.getAllCarsRaw()
-            _searchResults.value = cars.map { carEntity ->
-                CarLists(
-                    car_id = carEntity.car_id,
-                    Марка = carEntity.Марка,
-                    Модель = carEntity.Модель,
-                    Коробка_передач = carEntity.Коробка_передач,
-                    Владелец = carEntity.Владелец,
-                    Цена_за_сутки = carEntity.Цена_за_сутки,
-                    Описание = carEntity.Описание,
-                    updated_at = carEntity.updated_at,
-                    Местоположение = carEntity.Местоположение,
-                    Тип_кузова = carEntity.Тип_кузова,
-                    Год_выпуска = carEntity.Год_выпуска,
-                    Доступность = carEntity.Доступность ?: false,
-                    imageUrls = carEntity.imageUrls
-                )
-            }.filter { car ->
-                car.Марка?.contains(_searchQuery.value, ignoreCase = true) ?: false ||
-                        car.Модель?.contains(_searchQuery.value, ignoreCase = true) ?: false
-            }
+            repository.clearCache()
+            _searchResult.value = emptyList()
+        }
+    }
+    fun search(query: String){
+        viewModelScope.launch {
+            _cars.value = repository.searchCars(query)
         }
     }
 
-    fun clearCache() {
-        viewModelScope.launch {
-            repository.clearCache()
-        }
-    }
 }
