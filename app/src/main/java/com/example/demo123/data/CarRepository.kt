@@ -52,8 +52,8 @@ class CarRepository(
             Местоположение = this.Местоположение,
             imageUrls = this.imageUrls,
             Владелец = this.Владелец,
-            Описание = this.Описание,
-            Доступность = this.Доступность,
+            Описание = this.Описание ?: "",
+            Доступность = this.Доступность ?: true,
             updated_at = this.updated_at,
             Тип_кузова = this.Тип_кузова
         )
@@ -64,43 +64,26 @@ class CarRepository(
         }
     }
 
-    suspend fun fetchCarsFromSupabaseAndCache(){
+    suspend fun fetchCarsFromSupabaseAndCache() {
         try {
-
-            //загружаем данные из таблицы Машина
             val carsRaw = supabaseClient.from("Машина")
                 .select(Columns.raw("*, Изображение_автомобиля(image_url)"))
                 .decodeList<CarSupabaseRaw>()
 
-            //Создаем карту для подписанных URL изображений
-            val imageUrlsMap = mutableMapOf<String, List<String>>()
-            for (car in carsRaw) {
-                val imageResponse = supabaseClient.from("Изображение_автомобиля")
-                    .select(Columns.raw("car_id, image_url")) {
-                        filter { eq("car_id", car.car_id) }
+            val carEntities = carsRaw.mapNotNull { car ->
+                try {
+                    // Получаем подписанные URL для изображений
+                    val signedUrls = car.images.mapNotNull { image ->
+                        try {
+                            val bucketName = "carimage"
+                            val filePath = image.image_url.substringAfter("public/$bucketName")
+                            supabaseClient.storage.from(bucketName)
+                                .createSignedUrl(filePath, expiresIn = 1.hours)
+                        } catch (e: Exception) {
+                            null
+                        }
                     }
-                    .decodeList<EmbeddedCarImage>()
 
-                val signedUrls = imageResponse.mapNotNull {
-                    try {
-                        val bucketName = "carimage"
-                        val filePath = it.image_url.substringAfter("public/$bucketName")
-                        supabaseClient.storage.from(bucketName)
-                            .createSignedUrl(filePath, expiresIn = 1.hours)
-                    } catch (e: Exception) {
-                        null
-                    }
-                }
-                imageUrlsMap[car.car_id] = signedUrls
-            }
-
-            val carEntities = carsRaw.map { car ->
-                if (car.car_id == null || car.Модель == null || car.Марка == null || car.Цена_за_сутки == null ||
-                    car.images == null || car.Тип_кузова == null || car.updated_at == null || car.Доступность == null ||
-                    car.Описание == null || car.Владелец == null || car.Местоположение == null || car.Год_выпуска == null ||
-                    car.Коробка_передач == null
-                ) {
-                    Log.w("CarREpository", "Пропущена машина с null полями $car")
                     CarEntity(
                         car_id = car.car_id,
                         Марка = car.Марка,
@@ -109,39 +92,27 @@ class CarRepository(
                         Коробка_передач = car.Коробка_передач,
                         Цена_за_сутки = car.Цена_за_сутки,
                         Местоположение = car.Местоположение,
-                        imageUrls = car.images,
+                        imageUrls = signedUrls,
                         Владелец = car.Владелец,
-                        Описание = car.Описание,
-                        Доступность = car.Доступность,
+                        Описание = car.Описание ?: "",
+                        Доступность = car.Доступность ?: true,
                         updated_at = car.updated_at,
                         Тип_кузова = car.Тип_кузова
                     )
-                } else {
-                    CarEntity(
-                        car_id = car.car_id,
-                        Марка = car.Марка,
-                        Модель = car.Модель,
-                        Год_выпуска = car.Год_выпуска,
-                        Коробка_передач = car.Коробка_передач,
-                        Цена_за_сутки = car.Цена_за_сутки,
-                        Местоположение = car.Местоположение,
-                        imageUrls = car.images,
-                        Владелец = car.Владелец,
-                        Описание = car.Описание,
-                        Доступность = car.Доступность,
-                        updated_at = car.updated_at,
-                        Тип_кузова = car.Тип_кузова
-                    )
+                } catch (e: Exception) {
+                    Log.w("CarRepository", "Ошибка обработки машины ${car.car_id}: ${e.message}")
+                    null
                 }
             }
 
             carDao.deleteallCars()
             carDao.insertCars(carEntities)
             Log.d("CarRepository", "Загружено ${carEntities.size} машин в SQLite")
-        }catch (e: Exception){
-            Log.e("CarRepository","Ошибка загрузки из Supabase: ${e.message}", e)
+        } catch (e: Exception) {
+            Log.e("CarRepository", "Ошибка загрузки из Supabase: ${e.message}", e)
         }
     }
+
 
     suspend fun searchCars(query: String): List<CarLists> {
         val words = query.trim().lowercase().split("\\s+".toRegex())
@@ -169,91 +140,61 @@ class CarRepository(
         try {
             //Получаем время последнего обновления
             val lastUpdatedTime = carDao.getlastUpdateTime() ?: "1970-01-01"
-            Log.d("CarREpository","Время последнего обновления $lastUpdatedTime")
+            Log.d("CarREpository", "Время последнего обновления $lastUpdatedTime")
 
             //запрашиваем машины с updated_at > lastUpdatedTime
-            val query = supabaseClient.from("Машина")
+            val carsRaw = supabaseClient.from("Машина")
                 .select(Columns.raw("*, Изображение_автомобиля(image_url)")) {
                     filter { gt("updated_at", lastUpdatedTime) }
                 }
-            val carsRaw = query.decodeList<CarSupabaseRaw>()
-            Log.d("CarRepository","Supabase Raw вернул $carsRaw")
+                .decodeList<CarSupabaseRaw>()
+            Log.d("CarRepository", "Supabase Raw вернул $carsRaw")
 
-            //Загружаем подписанные URL для изображений
-            val imageUrlsMap = mutableMapOf<String, List<CarLists>>()
-            for (car in carsRaw) {
-                val carsRaw = supabaseClient.from("Машина")
-                    .select(Columns.raw("*, Изображение_автомобиля(image_url)"))
-                    .decodeList<CarSupabaseRaw>()
-
-                //Создаем карту для подписанных URL изображений
-                val imageUrlsMap = mutableMapOf<String, List<String>>()
-                for (car in carsRaw) {
-                    val imageResponse = supabaseClient.from("Изображение_автомобиля")
-                        .select(Columns.raw("car_id, image_url")) {
-                            filter { eq("car_id", car.car_id) }
-                        }
-                        .decodeList<EmbeddedCarImage>()
-
-                    val signedUrls = imageResponse.mapNotNull {
+            //Обрабатываем каждую машину
+            val carEntities = carsRaw.mapNotNull { car ->
+                try {
+                    val signedUrls = car.images.mapNotNull { image ->
                         try {
                             val bucketName = "carimage"
-                            val filePath = it.image_url.substringAfter("public/$bucketName")
+                            val filePath = image.image_url.substringAfter("public/$bucketName")
                             supabaseClient.storage.from(bucketName)
                                 .createSignedUrl(filePath, expiresIn = 1.hours)
                         } catch (e: Exception) {
                             null
                         }
                     }
-                    imageUrlsMap[car.car_id] = signedUrls
-                }
-                val carEntities = carsRaw.map { car ->
-                    if (car.car_id == null || car.Модель == null || car.Марка == null || car.Цена_за_сутки == null ||
-                        car.images == null || car.Тип_кузова == null || car.updated_at == null || car.Доступность == null ||
-                        car.Описание == null || car.Владелец == null || car.Местоположение == null || car.Год_выпуска == null ||
-                        car.Коробка_передач == null
-                    ) {
-                        Log.w("CarREpository", "Пропущена машина с null полями $car")
-                        CarEntity(
-                            car_id = car.car_id,
-                            Марка = car.Марка,
-                            Модель = car.Модель,
-                            Год_выпуска = car.Год_выпуска,
-                            Коробка_передач = car.Коробка_передач,
-                            Цена_за_сутки = car.Цена_за_сутки,
-                            Местоположение = car.Местоположение,
-                            imageUrls = car.images,
-                            Владелец = car.Владелец,
-                            Описание = car.Описание,
-                            Доступность = car.Доступность,
-                            updated_at = car.updated_at,
-                            Тип_кузова = car.Тип_кузова
-                        )
-                    } else {
-                        CarEntity(
-                            car_id = car.car_id,
-                            Марка = car.Марка,
-                            Модель = car.Модель,
-                            Год_выпуска = car.Год_выпуска,
-                            Коробка_передач = car.Коробка_передач,
-                            Цена_за_сутки = car.Цена_за_сутки,
-                            Местоположение = car.Местоположение,
-                            imageUrls = car.images,
-                            Владелец = car.Владелец,
-                            Описание = car.Описание,
-                            Доступность = car.Доступность,
-                            updated_at = car.updated_at,
-                            Тип_кузова = car.Тип_кузова
+                    if (car.car_id.isBlank() || car.Модель.isBlank() || car.Марка.isBlank()) {
+                        Log.w(
+                            "CarRepository",
+                            "Пропущена машина с пустыми обязательными полями: $car"
                         )
                     }
+                    CarEntity(
+                        car_id = car.car_id,
+                        Марка = car.Марка,
+                        Модель = car.Модель,
+                        Год_выпуска = car.Год_выпуска,
+                        Коробка_передач = car.Коробка_передач,
+                        Цена_за_сутки = car.Цена_за_сутки,
+                        Местоположение = car.Местоположение,
+                        imageUrls = signedUrls,
+                        Владелец = car.Владелец,
+                        Описание = car.Описание ?: "",
+                        Доступность = car.Доступность ?: true,
+                        updated_at = car.updated_at,
+                        Тип_кузова = car.Тип_кузова
+                    )
+                } catch (e: Exception) {
+                    Log.e("CarREpository", "Ошибка обработки машин ${car.car_id}", e)
+                    null
                 }
-                //вставляем новые данные
-                if (carEntities.isNotEmpty()) {
-                    carDao.insertCars(carEntities)
-                    Log.d("CarRepository","Синхронизированно ${carEntities.size} машин")
-                }else {
-                    Log.e("CarRepository","Нет новых машин для синхронизации")
-                }
+
+            }
+            if (carEntities.isNotEmpty()) {
+                carDao.insertCars(carEntities)
+                Log.d("CarRepository", "Синхронизированно ${carEntities.size} машин")
+            } else {
+                Log.d("CarREpository", "нет новых машин для синхронизации")
             }
         }catch (e: Exception){
             Log.e("CarRepository","Ошибка синхронизации ${e.message}",e)

@@ -19,7 +19,8 @@ data class CarData( //трогать нельзя
     val Местоположение: Int,
     val VIN: String,
     val Владелец: String,
-    val Описание: String
+    val Описание: String,
+    val Тип_кузова: Int
 )
 @Serializable
 data class Transmission(
@@ -140,7 +141,7 @@ data class CarSupabaseRaw(
     @SerialName("Владелец") val Владелец: String,
     @SerialName("Тип_кузова") val Тип_кузова: Int,
     @SerialName("Доступность") val Доступность: Boolean?,
-    @SerialName("Описание") val Описание: String,
+    @SerialName("Описание") val Описание: String?,
     @SerialName("updated_at") val updated_at: String,
     //val parsedDataTime = LocalDateTime.parse(updated_at, DateTimeFormatter.ISO_DATE_TIME)
 
@@ -148,5 +149,5 @@ data class CarSupabaseRaw(
     // ЭТОТ ПОЛЕ СООТВЕТСТВУЕТ ВЛОЖЕННЫМ ДАННЫМ ОТ select(..., Изображение_автомобиля(...))
     // @SerialName ДОЛЖЕН СОВПАДАТЬ С ИМЕНЕМ СВЯЗИ В БАЗЕ ("Изображение_автомобиля")
     // Тип должен быть List<Класс_для_вложенного_объекта> (то есть List<EmbeddedCarImage>)
-    @SerialName("Изображение_автомобиля") val images: List<String> = emptyList()
+    @SerialName("Изображение_автомобиля") val images: List<EmbeddedCarImage> = emptyList()
 )

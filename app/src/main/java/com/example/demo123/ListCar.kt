@@ -85,7 +85,7 @@ class ListCar : AppCompatActivity() {
                 carAdapter.submitList(cars)
                 binding.buttonSearch.isEnabled = true
                 if (cars.isEmpty() && binding.editTextSearch.toString().isNotEmpty()) {
-                    Toast.makeText(this@ListCar,"Автомобили не найдены", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ListCar,"Автомобили найдены", Toast.LENGTH_SHORT).show()
                 }
             }
         }

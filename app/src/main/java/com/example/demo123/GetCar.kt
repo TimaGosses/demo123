@@ -172,6 +172,7 @@ class GetCar : AppCompatActivity() {
         val Region = spinnerReg.selectedItemPosition
         val POD = EditTextPriceOfDay.text.toString().trim() //Цена в день(Price of Day)
         val VIN = EditTextVIN.text.toString().trim()
+        val body = spinnerBody_type.selectedItemPosition
         val EORS = EOR.toIntOrNull()
         val PODS = POD.toIntOrNull()
         val Description = EditTextDescription.text.toString().trim()
@@ -188,7 +189,7 @@ class GetCar : AppCompatActivity() {
 
 
 
-        if(Mark.isBlank() || Model.isBlank() || EOR.isBlank() || Transmission == 0 || POD.isBlank() || City == 0 || Region == 0 || Description.isBlank()){ //Проверка заполнености полей
+        if(Mark.isBlank() || Model.isBlank() || EOR.isBlank() || Transmission == 0 || POD.isBlank() || City == 0 || Region == 0 || Description.isBlank() || body == 0){ //Проверка заполнености полей
             Toast.makeText(this@GetCar, "Заполните поля!", Toast.LENGTH_SHORT).show()
             return
         }else if (EORS == null || PODS == null){
@@ -234,7 +235,7 @@ class GetCar : AppCompatActivity() {
                         return@launch
                     }
                     // Вызов saveCar
-                    val carId = saveCar(Mark, Model, EORS, transmissionId, PODS, cityId, VIN, ownerId, Description)
+                    val carId = saveCar(Mark, Model, EORS, transmissionId, PODS, cityId, VIN, ownerId, Description, body)
                     withContext(Dispatchers.Main) {
                         if (carId != null) {
                             Toast.makeText(this@GetCar,"Автомобиль успешно добавлен",Toast.LENGTH_SHORT).show()
@@ -267,7 +268,8 @@ class GetCar : AppCompatActivity() {
         CityId: Int,
         VIN: String,
         ownerId: String,
-        Description: String
+        Description: String,
+        body: Int
     ): String? {
         val supabaseClient = (application as MyApplication).supabase
         try {
@@ -301,7 +303,8 @@ class GetCar : AppCompatActivity() {
                 Местоположение = locationId.toInt(),
                 VIN = VIN,
                 Владелец = ownerId,
-                Описание = Description
+                Описание = Description,
+                Тип_кузова = body
             )
             Log.d("GetCar", "Отправляем данные в Машина: $carData, Владелец: $ownerId, auth.uid: ${supabaseClient.auth.currentUserOrNull()?.id}")
 

@@ -93,7 +93,7 @@ class LoginActivity : AppCompatActivity() {
 
             if (result.isSuccess) {  // условие с успешной авторизацей
                 Toast.makeText(this@LoginActivity, "Успешная авторизация", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this@LoginActivity, GetCar::class.java)
+                val intent = Intent(this@LoginActivity, ListCar::class.java)
                 startActivity(intent) //переход на другую страницу
                 //finish()
 

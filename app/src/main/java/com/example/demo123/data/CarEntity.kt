@@ -13,7 +13,7 @@ data class CarEntity (
     @PrimaryKey @ColumnInfo(name = "car_id") val car_id: String,
     @ColumnInfo(name = "Марка") val Марка: String,
     @ColumnInfo(name = "Цена_за_сутки") val Цена_за_сутки: Int,
-    @ColumnInfo(name = "Описание") val Описание: String,
+    @ColumnInfo(name = "Описание") val Описание: String?,
     @ColumnInfo(name = "Владелец") val Владелец: String,
     @ColumnInfo(name = "Год_выпуска") val Год_выпуска: Int,
     @ColumnInfo(name = "Модель") val Модель: String,

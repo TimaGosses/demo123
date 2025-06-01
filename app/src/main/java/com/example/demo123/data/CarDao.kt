@@ -15,7 +15,7 @@ interface CarDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCars(cars: List<CarEntity>)
 
-    @Query("SELECT * FROM car_table")
+    @Query("SELECT * FROM car_table ORDER BY updated_at DESC")
     fun getAllCars(): Flow<List<CarEntity>>
 
     @Query("SELECT * FROM car_table WHERE LOWER(Марка) LIKE :query OR LOWER(Модель) LIKE :query")

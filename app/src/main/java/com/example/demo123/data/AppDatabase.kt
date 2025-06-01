@@ -12,7 +12,7 @@ import com.google.gson.reflect.TypeToken
 
 //Описание базы данных
 
-@Database(entities = [CarEntity::class], version = 1, exportSchema = false)
+@Database(entities = [CarEntity::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun carDao(): CarDao
