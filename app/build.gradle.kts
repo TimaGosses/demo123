@@ -59,6 +59,7 @@ dependencies {
     // Room
     implementation ("androidx.room:room-runtime:2.5.0") // Библиотека "Room"
     implementation("com.google.auto.value:auto-value-annotations:1.10.1")
+    implementation("androidx.activity:activity:1.10.1")
     ksp("androidx.room:room-compiler:2.5.0")
     implementation ("androidx.room:room-ktx:2.5.0") // Дополнительно для Kotlin Coroutines, Kotlin Flows
 
@@ -76,6 +77,7 @@ dependencies {
     // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
     ksp("com.github.bumptech.glide:compiler:4.16.0")
+    implementation("com.tbuonomo:dotsindicator:5.1.0")
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")

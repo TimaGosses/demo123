@@ -104,12 +104,12 @@ data class CarLists(
     val Цена_за_сутки: Int,
     val Местоположение: Int,
     val imageUrls: List<String>,
-    val Владелец: String,
+    @SerialName("Владелец") val Владелец: String,
     val Описание: String,
     val Доступность: Boolean?,
     val updated_at: String,
-    val Тип_кузова: Int
-)
+    val Тип_кузова: Int,
+): java.io.Serializable
 @Serializable
 data class CarRaw(
     val car_id: String,
@@ -149,5 +149,6 @@ data class CarSupabaseRaw(
     // ЭТОТ ПОЛЕ СООТВЕТСТВУЕТ ВЛОЖЕННЫМ ДАННЫМ ОТ select(..., Изображение_автомобиля(...))
     // @SerialName ДОЛЖЕН СОВПАДАТЬ С ИМЕНЕМ СВЯЗИ В БАЗЕ ("Изображение_автомобиля")
     // Тип должен быть List<Класс_для_вложенного_объекта> (то есть List<EmbeddedCarImage>)
-    @SerialName("Изображение_автомобиля") val images: List<EmbeddedCarImage> = emptyList()
+    @SerialName("Изображение_автомобиля") val images: List<EmbeddedCarImage> = emptyList(),
+    //@SerialName("Номер_телефона") val Номер_телефона: String?
 )

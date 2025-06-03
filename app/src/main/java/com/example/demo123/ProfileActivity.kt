@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import java.util.UUID
 
 
 class ProfileActivity : AppCompatActivity() {
@@ -83,13 +84,14 @@ class ProfileActivity : AppCompatActivity() {
         val supabaseClient = (application as MyApplication).supabase  //подключение к supabase
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val userData = UserData(   //вызов data class UserData и вставка в него значений из переменных
+                val userData = UserData(                    //вызов data class UserData и вставка в него значений из переменных
+                    user_id = UUID.randomUUID().toString(), //автоматическая генерация uuid
                     Surname = Family,
                     Name = Name,
                     Middle_name = Otch,
                     Passport = Passport,
                     Number_VY = VY,
-                    Phone = Phone
+                    Number_phone = Phone
                 )
                 supabaseClient.from("Пользователь").insert(userData)  //сохранение данных в БД
                 withContext(Dispatchers.Main){

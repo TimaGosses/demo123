@@ -1,6 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Основные цвета -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <!-- Оттенки серого -->
+    <color name="gray">#FF808080</color>
+    <color name="light_gray">#FFD3D3D3</color>
+    <color name="dark_gray">#FF424242</color>
+    <color name="silver">#FFC0C0C0</color>
+    <color name="charcoal">#FF36454F</color>
+    <color name="slate_gray">#FF708090</color>
+    <color name="dim_gray">#FF696969</color>
+
+    <!-- Бежевые и коричневые -->
+    <color name="beige">#FFF5F5DC</color>
+    <color name="cream">#FFFFFDD0</color>
+    <color name="tan">#FFD2B48C</color>
+    <color name="brown">#FFA52A2A</color>
+    <color name="dark_brown">#FF654321</color>
+    <color name="sandy_brown">#FFF4A460</color>
+    <color name="chocolate">#FFD2691E</color>
+
+    <!-- Красные и розовые -->
+    <color name="red">#FFFF0000</color>
+    <color name="dark_red">#FF8B0000</color>
+    <color name="light_red">#FFFF6347</color>
+    <color name="crimson">#FFDC143C</color>
+    <color name="maroon">#FF800000</color>
+    <color name="pink">#FFFFC0CB</color>
+    <color name="hot_pink">#FFFF69B4</color>
+    <color name="deep_pink">#FFFF1493</color>
+
+    <!-- Синие и голубые -->
+    <color name="blue">#FF0000FF</color>
+    <color name="dark_blue">#FF00008B</color>
+    <color name="light_blue">#FFADD8E6</color>
+    <color name="sky_blue">#FF87CEEB</color>
+    <color name="navy">#FF000080</color>
+    <color name="indigo">#FF4B0082</color>
+    <color name="cornflower_blue">#FF6495ED</color>
+    <color name="steel_blue">#FF4682B4</color>
+    <color name="royal_blue">#FF4169E1</color>
+
+    <!-- Зеленые -->
+    <color name="green">#FF008000</color>
+    <color name="dark_green">#FF006400</color>
+    <color name="light_green">#FF90EE90</color>
+    <color name="lime">#FF00FF00</color>
+    <color name="forest_green">#FF228B22</color>
+    <color name="olive">#FF808000</color>
+    <color name="teal">#FF008080</color>
+    <color name="sea_green">#FF2E8B57</color>
+
+    <!-- Желтые и оранжевые -->
+    <color name="yellow">#FFFFFF00</color>
+    <color name="golden_yellow">#FFFFD700</color>
+    <color name="lemon_yellow">#FFFFF700</color>
+    <color name="orange">#FFFFA500</color>
+    <color name="dark_orange">#FFFF8C00</color>
+    <color name="light_orange">#FFFFDAB9</color>
+    <color name="amber">#FFFFBF00</color>
+
+    <!-- Фиолетовые -->
+    <color name="purple">#FF800080</color>
+    <color name="dark_purple">#FF4B0082</color> <!-- Может быть похож на indigo, но чуть другой оттенок -->
+    <color name="light_purple">#FFD8BFD8</color>
+    <color name="lavender">#FFE6E6FA</color>
+    <color name="violet">#FFEE82EE</color>
+    <color name="orchid">#FFDA70D6</color>
+
+    <!-- Другие яркие и насыщенные -->
+    <color name="cyan">#FF00FFFF</color>
+    <color name="magenta">#FFFF00FF</color>
+    <color name="aquamarine">#FF7FFFD4</color>
+    <color name="turquoise">#FF40E0D0</color>
+    <color name="gold">#FFFFD700</color> <!-- Повтор golden_yellow, можно использовать одно из двух -->
+    <color name="khaki">#FFF0E68C</color>
 </resources>

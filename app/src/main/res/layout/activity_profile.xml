@@ -149,28 +149,30 @@
         <!-- Кнопка Внести данные -->
         <Button
             android:id="@+id/buttonGet"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_width="379dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:backgroundTint="#00C4B4"
+            android:padding="10dp"
             android:text="Внести данные"
             android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:padding="12dp"
-            android:layout_marginBottom="16dp" />
+            android:textSize="16sp" />
 
         <!-- Кнопка Добавить автомобиль -->
+        <!-- Дополнительный отступ снизу -->
+
+        <!-- Дополнительное пространство для проверки прокрутки -->
         <Button
             android:id="@+id/buttonGetC"
             android:layout_width="match_parent"
             android:layout_height="48dp"
+            android:layout_marginBottom="48dp"
             android:backgroundTint="#00C4B4"
+            android:padding="10dp"
             android:text="Добавить автомобиль"
             android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:padding="12dp"
-            android:layout_marginBottom="48dp" /> <!-- Дополнительный отступ снизу -->
+            android:textSize="16sp" />
 
-        <!-- Дополнительное пространство для проверки прокрутки -->
         <Space
             android:layout_width="match_parent"
             android:layout_height="200dp" />

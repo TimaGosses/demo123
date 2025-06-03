@@ -55,7 +55,7 @@ class CarRepository(
             Описание = this.Описание ?: "",
             Доступность = this.Доступность ?: true,
             updated_at = this.updated_at,
-            Тип_кузова = this.Тип_кузова
+            Тип_кузова = this.Тип_кузова,
         )
     }
     fun getAllCarsFlow(): Flow<List<CarLists>> {
@@ -97,7 +97,7 @@ class CarRepository(
                         Описание = car.Описание ?: "",
                         Доступность = car.Доступность ?: true,
                         updated_at = car.updated_at,
-                        Тип_кузова = car.Тип_кузова
+                        Тип_кузова = car.Тип_кузова,
                     )
                 } catch (e: Exception) {
                     Log.w("CarRepository", "Ошибка обработки машины ${car.car_id}: ${e.message}")
@@ -182,7 +182,7 @@ class CarRepository(
                         Описание = car.Описание ?: "",
                         Доступность = car.Доступность ?: true,
                         updated_at = car.updated_at,
-                        Тип_кузова = car.Тип_кузова
+                        Тип_кузова = car.Тип_кузова,
                     )
                 } catch (e: Exception) {
                     Log.e("CarREpository", "Ошибка обработки машин ${car.car_id}", e)

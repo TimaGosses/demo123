@@ -35,4 +35,5 @@ interface CarDao {
 
     @Query("SELECT * FROM car_table WHERE LOWER(Марка) LIKE '%' || :Марка || '%' AND LOWER(Модель) LIKE '%' || :Модель || '%'")
     suspend fun searchByBrandOrModel(Марка: String, Модель: String): List<CarLists>
+
 }

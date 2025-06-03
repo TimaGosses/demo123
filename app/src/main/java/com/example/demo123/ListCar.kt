@@ -36,6 +36,7 @@ class ListCar : AppCompatActivity() {
     private lateinit var binding: ActivityListCarBinding
     private lateinit var buttonGetCarList: Button
     private lateinit var buttonRegister: Button
+    private lateinit var buttonSearch: Button
     private lateinit var repository: CarRepository
     private lateinit var authManager: AuthManager
     private val viewModel: ListCarViewModel by viewModels {
@@ -51,11 +52,14 @@ class ListCar : AppCompatActivity() {
         recyclerView = binding.carRecyclerView
         buttonGetCarList = binding.buttonGetCarList
         buttonRegister = binding.buttonRegister
+        buttonSearch = binding.buttonSearch
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         carAdapter = CarAdapter {car ->
-            val intent = Intent(this@ListCar, MyCarsActivity::class.java)
-            intent.putExtra("car_id",car.car_id)
+            Log.d("ListCar","Клик по автомобилю, передаем данные: car_id = ${car.car_id}, Марка = ${car.Марка}")
+            val intent = Intent(this@ListCar, CarDetailActivity::class.java)
+            intent.putExtra("CarDetail",car)
+            Log.d("ListCar","Создан Intent с extra: CarDetail: $car")
             startActivity(intent)
         }
         recyclerView.adapter = carAdapter
@@ -70,12 +74,7 @@ class ListCar : AppCompatActivity() {
             startActivity(Intent(this, Register::class.java))
         }
 
-        binding.buttonSearch.setOnClickListener {
-            val query = binding.editTextSearch.text.toString().trim()
-            viewModel.updateSearchQuery(query)
-        }
-
-        binding.errorView.setOnClickListener {
+                    binding.errorView.setOnClickListener {
             viewModel.checkAuthAndFetchData()
         }
         viewModel.checkAuthAndFetchData()

@@ -18,22 +18,14 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.example.demo123.R
 import com.example.demo123.CarData
+import com.example.demo123.databinding.ItemCarListBinding
 
 class CarAdapter(
     private val onItemClick: (CarLists) -> Unit
 ) : ListAdapter<CarLists, CarAdapter.CarViewHolder>(CarDiffCallback()) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CarViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_car_list, parent, false)
-        return CarViewHolder(view)
-    }
 
-    override fun onBindViewHolder(holder: CarViewHolder, position: Int) {
-        holder.bind(getItem(position))
-    }
-
-    inner class CarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class CarViewHolder(val binding: ItemCarListBinding) : RecyclerView.ViewHolder(binding.root) {
         private val carImage: ImageView = itemView.findViewById(R.id.imageCar)
         private val carMark: TextView = itemView.findViewById(R.id.textMark)
         private val carModel: TextView = itemView.findViewById(R.id.textModel)
@@ -84,10 +76,35 @@ class CarAdapter(
                         .into(it)
                 }
             }
-            itemView.setOnClickListener { onItemClick(car) }
+            //itemView.setOnClickListener { onItemClick(car) }
         }
     }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CarViewHolder {
+        /*val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_car_list, parent, false)
+        return CarViewHolder(view)*/
+        val binding = ItemCarListBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
+        )
+        Log.d("CarAdapter","Создан ViewHolder")
+        return CarViewHolder(binding)
+
+    }
+
+    override fun onBindViewHolder(holder: CarViewHolder, position: Int) {
+        // holder.bind(getItem(position))
+        Log.d("CarAdapter", "OnBindingHolder: position = $position")
+        val car = getItem(position)
+        holder.bind(car)
+        holder.itemView.setOnClickListener {
+            onItemClick(car)
+        }
+
+
+    }
 }
+
+
 class CarDiffCallback : DiffUtil.ItemCallback<CarLists>() {
     override fun areItemsTheSame(oldItem: CarLists, newItem: CarLists): Boolean {
         return oldItem.car_id == newItem.car_id

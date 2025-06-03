@@ -17,6 +17,7 @@ import java.io.File
 
 class ImageAdapter : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
     private val imageFiles: MutableList<File> = mutableListOf()
+    private var lastLoggedSize = -1 // для предотвращения повторного логирования
 
     class ImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.findViewById(R.id.imageView1)

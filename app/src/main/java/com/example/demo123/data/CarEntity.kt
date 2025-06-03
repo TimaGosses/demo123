@@ -4,11 +4,17 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 import androidx.room.ColumnInfo
+import androidx.room.TypeConverters
+import com.example.demo123.UserData
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 //Данные в Room
 @Entity(tableName = "car_table")
+@TypeConverters(Converters::class) //конвертер для UserData
+@Serializable
 data class CarEntity (
     @PrimaryKey @ColumnInfo(name = "car_id") val car_id: String,
     @ColumnInfo(name = "Марка") val Марка: String,
@@ -24,4 +30,27 @@ data class CarEntity (
     @ColumnInfo(name = "imageUrls") val imageUrls: List<String>, //List Url адресов фото
     @ColumnInfo(name = "updated_at") val updated_at: String,
     )
+
+class Converters {
+
+    @TypeConverter
+    fun fromList(value: List<String>): String {
+        return Gson().toJson(value)
+    }
+
+    @TypeConverter
+    fun toList(value: String): List<String> {
+        val listType = object : TypeToken<List<String>>() {}.type
+        return Gson().fromJson(value, listType)
+    }
+
+    @TypeConverter
+    fun fromUserData(userData: UserData?): String? {
+        return userData?.let { Json.encodeToString(it) }
+    }
+    @TypeConverter
+    fun toUserData(userDatString: String?): UserData? {
+        return userDatString?.let { Json.decodeFromString<UserData>(it) }
+    }
+}
 
