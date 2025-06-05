@@ -18,6 +18,7 @@ import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -64,11 +65,12 @@ class CarRepository(
         }
     }
 
-    suspend fun fetchCarsFromSupabaseAndCache() {
+    suspend fun fetchCars() {
         try {
             val carsRaw = supabaseClient.from("Машина")
                 .select(Columns.raw("*, Изображение_автомобиля(image_url)"))
                 .decodeList<CarSupabaseRaw>()
+            Log.d("CarRepository", "получено: ${carsRaw.size} машин из Supabase")
 
             val carEntities = carsRaw.mapNotNull { car ->
                 try {
@@ -80,6 +82,7 @@ class CarRepository(
                             supabaseClient.storage.from(bucketName)
                                 .createSignedUrl(filePath, expiresIn = 1.hours)
                         } catch (e: Exception) {
+                            Log.e("CarRepository", "Ошибка создания Url для ${image.image_url}: ${e.message}")
                             null
                         }
                     }
@@ -113,6 +116,50 @@ class CarRepository(
         }
     }
 
+    suspend fun fetchCarsWithRetry(retries: Int = 3, delayMillis: Long = 1000): List<CarLists> {
+        repeat(retries) { attempt ->
+            try {
+                val carsRaw = supabaseClient
+                    .from("Машина")
+                    .select(Columns.raw("*, Изображение_автомобиля(image_url)")) {
+                        filter { gt("updated_at", "2025-06-01T06:38:00.752306") }
+                    }
+                    .decodeList<CarSupabaseRaw>()
+                return carsRaw.map { car ->
+                    val signedUrls = car.images.mapNotNull { image ->
+                        try {
+                            val bucketName = "carimage"
+                            val filePath = image.image_url.substringAfter("public/$bucketName")
+                            supabaseClient.storage.from(bucketName)
+                                .createSignedUrl(filePath, expiresIn = 1.hours)
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                    CarLists(
+                        car_id = car.car_id,
+                        Марка = car.Марка,
+                        Модель = car.Модель,
+                        Год_выпуска = car.Год_выпуска,
+                        Коробка_передач = car.Коробка_передач,
+                        Цена_за_сутки = car.Цена_за_сутки,
+                        Местоположение = car.Местоположение,
+                        imageUrls = signedUrls,
+                        Владелец = car.Владелец,
+                        Описание = car.Описание ?: "",
+                        Доступность = car.Доступность ?: true,
+                        updated_at = car.updated_at,
+                        Тип_кузова = car.Тип_кузова,
+                    )
+                }
+            } catch (e: Exception) {
+                if (attempt == retries - 1) throw e
+                Log.w("CarRepository", "Попытка ${attempt + 1} не удалась, повтор через $delayMillis мс")
+                delay(delayMillis)
+            }
+        }
+        throw Exception("Не удалось выполнить запрос после $retries попыток")
+    }
 
     suspend fun searchCars(query: String): List<CarLists> {
         val words = query.trim().lowercase().split("\\s+".toRegex())

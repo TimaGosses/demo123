@@ -67,6 +67,7 @@ dependencies {
     // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.2")
 
     // Supabase
     implementation("io.github.jan-tennert.supabase:postgrest-kt:3.1.4")
@@ -83,7 +84,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     // Ktor
-    implementation("io.ktor:ktor-client-cio:3.0.1")
+    implementation("io.ktor:ktor-client-cio:3.1.2")
     implementation("com.google.code.gson:gson:2.11.0")
 
     // UI и AndroidX

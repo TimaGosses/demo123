@@ -12,6 +12,7 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.network.sockets.aSocket
 
 class MyApplication : Application() {
@@ -52,9 +53,10 @@ class MyApplication : Application() {
             }
             install(Storage)
             httpEngine = CIO.create {
-                requestTimeout = 30000 // 30 секунд
-                maxConnectionsCount = 30000 // 30 секунд
+                requestTimeout = 40000 // 30 секунд
+                maxConnectionsCount = 40000 // 30 секунд
             }
+
         }
     }
 }

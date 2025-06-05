@@ -10,7 +10,7 @@
         android:id="@+id/imageView1"
         android:layout_width="300dp"
         android:layout_height="300dp"
-        android:background="#F01212"
+        android:background="@color/white"
         android:scaleType="centerCrop"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -8,16 +8,25 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.autofill.ContentDataType.Companion.Date
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import co.touchlab.kermit.SimpleFormatter
 import com.example.demo123.GetCar
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.toJavaInstant
 import kotlinx.serialization.Serializable
+
+import java.text.SimpleDateFormat
 import java.util.UUID
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Date
 
 
 class ProfileActivity : AppCompatActivity() {
