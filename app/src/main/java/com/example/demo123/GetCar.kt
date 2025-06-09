@@ -121,7 +121,7 @@ class GetCar : AppCompatActivity() {
                 tableName = "Коробка_передач_автомобиля",
                 spinner = spinnerKPP,
                 decodeList = {supabaseClient.from("Коробка_передач_автомобиля").select().decodeList<Transmission>()},
-                getName = { (it as Transmission).Название},
+                getName = { (it as Transmission).Название_коробки_передач},
                 errorMessage = "Ошибка загрузки коробки передач",
                 onDataLoaded = {transmission = it as List<Transmission>}
 
@@ -146,7 +146,7 @@ class GetCar : AppCompatActivity() {
                 tableName = "Тип_кузова",
                 spinner = spinnerBody_type,
                 decodeList = {supabaseClient.from("Тип_кузова").select().decodeList<BodyType>()},
-                getName = { (it as BodyType).Название},
+                getName = { (it as BodyType).Название_типа_кузова},
                 errorMessage = "Ошибка загрузки типа кузова",
                 onDataLoaded = {body_type = it as List<BodyType>}
 

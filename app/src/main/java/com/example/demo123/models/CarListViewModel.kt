@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Query
 import com.example.demo123.AuthManager
+import com.example.demo123.CarListes
 import com.example.demo123.CarLists
 import com.example.demo123.data.CarRepository
 import kotlinx.coroutines.flow.Flow
@@ -28,8 +29,8 @@ class ListCarViewModel constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _searchResult = MutableStateFlow<List<CarLists>>(emptyList())
-    val searchResult: StateFlow<List<CarLists>> = _searchResult.asStateFlow()
+    private val _searchResult = MutableStateFlow<List<CarListes>>(emptyList())
+    val searchResult: StateFlow<List<CarListes>> = _searchResult.asStateFlow()
 
     private val _errorFlow = MutableStateFlow<String?>(null)
     val errorFlow: StateFlow<String?> = _errorFlow.asStateFlow()
@@ -37,35 +38,36 @@ class ListCarViewModel constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val _isListVisible= MutableStateFlow(true)
+    private val _isListVisible = MutableStateFlow(true)
     val isListVisible: StateFlow<Boolean> = _isListVisible.asStateFlow()
 
-    private val _isErrorVisible = MutableStateFlow(false )
+    private val _isErrorVisible = MutableStateFlow(false)
     val isErrorVisible: StateFlow<Boolean> = _isErrorVisible.asStateFlow()
 
-
-    private val _cars = MutableStateFlow<List<CarLists>>(emptyList())
-    val cars: StateFlow<List<CarLists>> = _cars.asStateFlow()
-    val allCars: Flow<List<CarLists>> = repository.getAllCars()
+    private val _cars = MutableStateFlow<List<CarListes>>(emptyList())
+    val cars: StateFlow<List<CarListes>> = _cars.asStateFlow()
+    val allCars: Flow<List<CarListes>> = repository.getAllCars()
 
     init {
-        //подписываемя на данные репозитория
         viewModelScope.launch {
             repository.getAllCarsFlow().collect { cars ->
                 _searchResult.value = cars.filter { car ->
-                    car.Марка.contains(_searchQuery.value, ignoreCase = true)
+                    val query = _searchQuery.value.lowercase()
+                    query.isEmpty() ||
+                            car.Марка.lowercase().contains(query) ||
+                            car.Модель.lowercase().contains(query)
                 }
-                Log.d("CarListViewModel","Фильтр машин: ${_searchResult.value.size}")
+                Log.d("CarListViewModel", "Фильтр машин: ${_searchResult.value.size}")
             }
-
         }
         checkAuthAndFetchData()
     }
-    fun checkAuthAndFetchData(){
+
+    fun checkAuthAndFetchData() {
         viewModelScope.launch {
-            if (authManager.checkAuth()){
+            if (authManager.checkAuth()) {
                 fetchCarsFromSupabase()
-            }else {
+            } else {
                 _errorFlow.value = "Требуется авторизация"
                 authManager.redirectToLogin(context)
                 _isErrorVisible.value = true
@@ -73,19 +75,19 @@ class ListCarViewModel constructor(
         }
     }
 
-    private suspend fun fetchCarsFromSupabase(){
+    private suspend fun fetchCarsFromSupabase() {
         try {
             _isLoading.value = true
             _isListVisible.value = true
             _isErrorVisible.value = false
             repository.syncCars(context)
             _isListVisible.value = true
-        }catch (e: Exception){
+        } catch (e: Exception) {
             _errorFlow.value = "Ошибка загрузки данных: ${e.message}"
             val cachedCars = repository.getAllCarsFlow().firstOrNull() ?: emptyList()
             if (cachedCars.isNotEmpty()) {
                 _isListVisible.value = true
-            }else {
+            } else {
                 _isErrorVisible.value = true
             }
         } finally {
@@ -93,20 +95,20 @@ class ListCarViewModel constructor(
         }
     }
 
-    fun updateSearchQuery(query: String){
+    fun updateSearchQuery(query: String) {
         _searchQuery.value = query
     }
 
-    fun clearCache(){
+    fun clearCache() {
         viewModelScope.launch {
             repository.clearCache()
             _searchResult.value = emptyList()
         }
     }
-    fun search(query: String){
+
+    fun search(query: String) {
         viewModelScope.launch {
-            _cars.value = repository.searchCars(query)
+            _searchResult.value = repository.searchCars(query)
         }
     }
-
 }

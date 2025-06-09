@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.example.demo123.CarListes
 import com.example.demo123.CarLists
 import com.example.demo123.data.CarEntity
 import kotlinx.coroutines.flow.Flow
@@ -33,7 +34,7 @@ interface CarDao {
     @Query("SELECT * FROM car_table")
     suspend fun logCars(): List<CarEntity>
 
-    @Query("SELECT * FROM car_table WHERE LOWER(Марка) LIKE '%' || :Марка || '%' AND LOWER(Модель) LIKE '%' || :Модель || '%'")
-    suspend fun searchByBrandOrModel(Марка: String, Модель: String): List<CarLists>
+    @Query("SELECT * FROM car_table WHERE Марка LIKE '%' || :Марка || '%' AND Модель LIKE '%' || :Модель || '%'")
+    suspend fun searchByBrandOrModel(Марка: String, Модель: String): List<CarEntity>
 
 }

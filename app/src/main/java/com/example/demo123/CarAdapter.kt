@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.example.demo123.R
@@ -21,36 +22,48 @@ import com.example.demo123.CarData
 import com.example.demo123.databinding.ItemCarListBinding
 
 class CarAdapter(
-    private val onItemClick: (CarLists) -> Unit
-) : ListAdapter<CarLists, CarAdapter.CarViewHolder>(CarDiffCallback()) {
+    private val onItemClick: (CarListes) -> Unit
+) : ListAdapter<CarListes, CarAdapter.CarViewHolder>(CarDiffCallback()) {
 
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CarViewHolder {
+        val binding = ItemCarListBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
+        )
+        Log.d("CarAdapter", "Создан ViewHolder")
+        return CarViewHolder(binding)
+    }
 
-    class CarViewHolder(val binding: ItemCarListBinding) : RecyclerView.ViewHolder(binding.root) {
-        private val carImage: ImageView = itemView.findViewById(R.id.imageCar)
-        private val carMark: TextView = itemView.findViewById(R.id.textMark)
-        private val carModel: TextView = itemView.findViewById(R.id.textModel)
-        private val carPrice: TextView = itemView.findViewById(R.id.textPrice)
+    override fun onBindViewHolder(holder: CarViewHolder, position: Int) {
+        Log.d("CarAdapter", "OnBindViewHolder: position = $position")
+        val car = getItem(position)
+        holder.bind(car)
+        holder.itemView.setOnClickListener {
+            onItemClick(car)
+        }
+    }
 
-        fun bind(car: CarLists) {
-            carMark.text = car.Марка
-            carModel.text = car.Модель
-            carPrice.text = "${car.Цена_за_сутки} ₽/сутки"
+    class CarViewHolder(private val binding: ItemCarListBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(car: CarListes) {
+            binding.textMark.text = car.Марка
+            binding.textModel.text = car.Модель
+            binding.textPrice.text = "${car.Цена_за_сутки} ₽/сутки"
 
             val imageUrl = car.imageUrls.firstOrNull()
             Log.d("CarAdapter", "Для автомобиля ${car.Марка}, ${car.Модель}, imageUrl = $imageUrl")
 
-            carImage.let {
-                if (imageUrl != null && imageUrl is String) {
+            binding.imageCar.let { imageView ->
+                if (!imageUrl.isNullOrBlank()) {
                     Glide.with(itemView.context)
                         .load(imageUrl)
                         .placeholder(R.drawable.placeholder_car)
                         .error(R.drawable.placeholder_car)
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .transition(DrawableTransitionOptions.withCrossFade())
                         .listener(object : RequestListener<Drawable> {
                             override fun onLoadFailed(
                                 e: GlideException?,
                                 model: Any?,
-                                target: Target<Drawable?>,
+                                target: Target<Drawable>,
                                 isFirstResource: Boolean
                             ): Boolean {
                                 Log.e("CarAdapter", "Ошибка загрузки изображения: ${e?.message}")
@@ -60,7 +73,7 @@ class CarAdapter(
                             override fun onResourceReady(
                                 resource: Drawable,
                                 model: Any,
-                                target: Target<Drawable?>?,
+                                target: Target<Drawable>?,
                                 dataSource: DataSource,
                                 isFirstResource: Boolean
                             ): Boolean {
@@ -68,49 +81,23 @@ class CarAdapter(
                                 return false
                             }
                         })
-                        .into(it)
+                        .into(imageView)
                 } else {
-                    Log.e("CarAdapter", "Некорректный imageUrl для ${car.Марка}, ${car.Модель}: $imageUrl")
+                    Log.w("CarAdapter", "Нет изображения для ${car.Марка}, ${car.Модель}")
                     Glide.with(itemView.context)
                         .load(R.drawable.placeholder_car)
-                        .into(it)
+                        .into(imageView)
                 }
             }
-            //itemView.setOnClickListener { onItemClick(car) }
         }
-    }
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CarViewHolder {
-        /*val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_car_list, parent, false)
-        return CarViewHolder(view)*/
-        val binding = ItemCarListBinding.inflate(
-            LayoutInflater.from(parent.context), parent, false
-        )
-        Log.d("CarAdapter","Создан ViewHolder")
-        return CarViewHolder(binding)
-
-    }
-
-    override fun onBindViewHolder(holder: CarViewHolder, position: Int) {
-        // holder.bind(getItem(position))
-        Log.d("CarAdapter", "OnBindingHolder: position = $position")
-        val car = getItem(position)
-        holder.bind(car)
-        holder.itemView.setOnClickListener {
-            onItemClick(car)
-        }
-
-
     }
 }
-
-
-class CarDiffCallback : DiffUtil.ItemCallback<CarLists>() {
-    override fun areItemsTheSame(oldItem: CarLists, newItem: CarLists): Boolean {
+class CarDiffCallback : DiffUtil.ItemCallback<CarListes>() {
+    override fun areItemsTheSame(oldItem: CarListes, newItem: CarListes): Boolean {
         return oldItem.car_id == newItem.car_id
     }
 
-    override fun areContentsTheSame(oldItem: CarLists, newItem: CarLists): Boolean {
+    override fun areContentsTheSame(oldItem: CarListes, newItem: CarListes): Boolean {
         return oldItem == newItem
     }
 }

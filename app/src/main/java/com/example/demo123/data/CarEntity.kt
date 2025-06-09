@@ -15,7 +15,7 @@ import kotlinx.serialization.json.Json
 @Entity(tableName = "car_table")
 @TypeConverters(Converters::class) //конвертер для UserData
 @Serializable
-data class CarEntity (
+data class CarEntity(
     @PrimaryKey @ColumnInfo(name = "car_id") val car_id: String,
     @ColumnInfo(name = "Марка") val Марка: String,
     @ColumnInfo(name = "Цена_за_сутки") val Цена_за_сутки: Int,
@@ -24,12 +24,16 @@ data class CarEntity (
     @ColumnInfo(name = "Год_выпуска") val Год_выпуска: Int,
     @ColumnInfo(name = "Модель") val Модель: String,
     @ColumnInfo(name = "Коробка_передач") val Коробка_передач: Int,
+    @ColumnInfo(name = "Название_коробки_передач") val Название_коробки_передач: String,
     @ColumnInfo(name = "Местоположение") val Местоположение: Int,
+    //@ColumnInfo(name = "Название_региона") val Название_региона: String,
+    @ColumnInfo(name = "Название_города") val Название_города: String,
     @ColumnInfo(name = "Тип_кузова") val Тип_кузова: Int,
+    @ColumnInfo(name = "Название_типа_кузова") val Название_типа_кузова: String,
     @ColumnInfo(name = "Доступность") val Доступность: Boolean?,
-    @ColumnInfo(name = "imageUrls") val imageUrls: List<String>, //List Url адресов фото
-    @ColumnInfo(name = "updated_at") val updated_at: String,
-    )
+    @ColumnInfo(name = "imageUrls") val imageUrls: List<String>,
+    @ColumnInfo(name = "updated_at") val updated_at: String
+)
 
 class Converters {
 

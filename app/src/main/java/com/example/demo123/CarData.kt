@@ -1,7 +1,9 @@
 package com.example.demo123
+import androidx.room.ColumnInfo
 import androidx.room.PrimaryKey
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
+import java.io.Serializable as JavaSerializable
 import kotlinx.serialization.Contextual
 import java.util.UUID
 import kotlinx.serialization.SerialName
@@ -25,7 +27,7 @@ data class CarData( //трогать нельзя
 @Serializable
 data class Transmission(
     val id: Int,
-    val Название: String
+    val Название_коробки_передач: String
 )
 @Serializable
 data class City(
@@ -36,7 +38,7 @@ data class City(
 @Serializable
 data class BodyType(
     val id: Int,
-    val Название: String
+    val Название_типа_кузова: String
 )
 @Serializable
 data class Region(
@@ -83,17 +85,26 @@ data class CarResponse(
 )
 
 @Serializable
-data class Car(
+data class CarListes(
     val car_id: String,
     val Марка: String,
-    val Модель: String,
-    val Год_выпуска: Int,
-    val Коробка_передач: Int,
     val Цена_за_сутки: Int,
+    val Описание: String?,
+    val Владелец: String,
+    val Год_выпуска: Int,
+    val Модель: String,
+    val Коробка_передач: Int,
+    val Название_коробки_передач: String,
     val Местоположение: Int,
+   // val Название_региона: String,
+    val Название_города: String,
+    val Тип_кузова: Int,
+    val Название_типа_кузова: String,
+    val Доступность: Boolean?,
     val imageUrls: List<String>,
-    val Владелец: String
-)
+    val updated_at: String
+) : JavaSerializable
+
 @Serializable
 data class CarLists(
     val car_id: String,
@@ -152,3 +163,56 @@ data class CarSupabaseRaw(
     @SerialName("Изображение_автомобиля") val images: List<EmbeddedCarImage> = emptyList(),
     //@SerialName("Номер_телефона") val Номер_телефона: String?
 )
+
+@Serializable
+data class CarSupabaseRaws(
+    val car_id: String,
+    val Марка: String,
+    val Модель: String,
+    val Год_выпуска: Int,
+    @SerialName("Коробка_передач_автомобиля") val Коробка_передач: Transmissions,
+    val Цена_за_сутки: Int,
+    @SerialName("Город") val Город: Citys? = null, // Местоположение связано с Город
+    val Владелец: String,
+    val Описание: String? = null,
+    val Доступность: Boolean? = true,
+    val updated_at: String,
+    @SerialName("Местонахождение_автомобиля") val Местонахождение_автомобиля: Location? = null,
+    @SerialName("Тип_кузова") val Тип_кузова: BodyTypes,
+    @SerialName("Изображение_автомобиля") val images: List<EmbeddedCarImage> = emptyList(),
+    //@SerialName("Регион") val Регион: Regions? = null
+)
+
+@Serializable
+data class Transmissions(
+    val id: Int,
+    @SerialName("Название_коробки_передач") val Название_коробки_передач: String
+)
+
+@Serializable
+data class Citys(
+    val id: Int,
+    @SerialName("Название_города") val Название_города: String, // Используем Название_города для соответствия CarEntity
+    //@SerialName("Регион") val Регион: Regions // Используем Название_города для соответствия CarEntity
+)
+
+@Serializable
+data class Location(
+    val id: Int,
+    @SerialName("Город") val Город: Citys? = null
+
+
+)
+
+@Serializable
+data class BodyTypes(
+    val id: Int,
+    @SerialName("Название_типа_кузова") val Название_типа_кузова: String
+)
+
+@Serializable
+data class Regions(
+    val id: Int,
+    @SerialName("Название") val Название_региона: String
+)
+

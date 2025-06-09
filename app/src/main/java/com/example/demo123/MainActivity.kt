@@ -54,23 +54,7 @@ class MainActivity : AppCompatActivity() {
     private fun getData(){
         lifecycleScope.launch {
 
-            val client = getClient()
-            val supabaseReponse = client.postgrest["User"].select()
-            val data = supabaseReponse.decodeList<User>()
-            Toast.makeText(this@MainActivity, "Данные: $data", Toast.LENGTH_SHORT).show()
 
-            if (data.isNotEmpty()){
-                val firsUser = data.first()
-
-
-                editTextId.setText(firsUser.id.toString())
-                editTextEmail.setText(firsUser.Email.toString())
-                editTextPassword.setText(firsUser.Password.toString())
-
-                Toast.makeText(this@MainActivity, "Успешно", Toast.LENGTH_SHORT).show()
-            }else{
-                Toast.makeText(this@MainActivity, "Error", Toast.LENGTH_SHORT).show()
-            }
 
 
 

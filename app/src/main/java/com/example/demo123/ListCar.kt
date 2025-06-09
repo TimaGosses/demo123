@@ -30,93 +30,94 @@ import kotlin.jvm.java
 
 
 class ListCar : AppCompatActivity() {
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var carAdapter: CarAdapter
-    private var carDataList = mutableListOf<CarLists>()
     private lateinit var binding: ActivityListCarBinding
-    private lateinit var buttonGetCarList: Button
-    private lateinit var buttonRegister: Button
-    private lateinit var buttonSearch: Button
-    private lateinit var repository: CarRepository
-    private lateinit var authManager: AuthManager
+    private lateinit var carAdapter: CarAdapter
     private val viewModel: ListCarViewModel by viewModels {
         ListCarViewModelFactory(application as MyApplication, this)
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityListCarBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
-        // Инициализация переменных
-        recyclerView = binding.carRecyclerView
-        buttonGetCarList = binding.buttonGetCarList
-        buttonRegister = binding.buttonRegister
-        buttonSearch = binding.buttonSearch
-
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        carAdapter = CarAdapter {car ->
-            Log.d("ListCar","Клик по автомобилю, передаем данные: car_id = ${car.car_id}, Марка = ${car.Марка}")
+        // Настройка RecyclerView
+        binding.carRecyclerView.layoutManager = LinearLayoutManager(this)
+        carAdapter = CarAdapter { car ->
+            Log.d("ListCar", "Клик по автомобилю, передаем данные: car_id = ${car.car_id}, Марка = ${car.Марка}")
             val intent = Intent(this@ListCar, CarDetailActivity::class.java)
-            intent.putExtra("CarDetail",car)
-            Log.d("ListCar","Создан Intent с extra: CarDetail: $car")
+            intent.putExtra("CarDetail", car)
+            Log.d("ListCar", "Создан Intent с extra: CarDetail: $car")
             startActivity(intent)
         }
-        recyclerView.adapter = carAdapter
+        binding.carRecyclerView.adapter = carAdapter
 
+        // Отключение кнопки поиска до загрузки данных
         binding.buttonSearch.isEnabled = false
 
-        buttonGetCarList.setOnClickListener {
+        // Обработчики кнопок
+        binding.buttonGetCarList.setOnClickListener {
             startActivity(Intent(this, GetCar::class.java))
         }
 
-        buttonRegister.setOnClickListener {
+        binding.buttonRegister.setOnClickListener {
             startActivity(Intent(this, Register::class.java))
         }
 
-                    binding.errorView.setOnClickListener {
+        binding.errorView.setOnClickListener {
             viewModel.checkAuthAndFetchData()
         }
+
+        // Инициировать загрузку данных
         viewModel.checkAuthAndFetchData()
 
+        // Наблюдение за данными
         lifecycleScope.launch {
-            viewModel.searchResult.collect{cars ->
+            viewModel.searchResult.collect { cars ->
                 carAdapter.submitList(cars)
                 binding.buttonSearch.isEnabled = true
-                if (cars.isEmpty() && binding.editTextSearch.toString().isNotEmpty()) {
-                    Toast.makeText(this@ListCar,"Автомобили найдены", Toast.LENGTH_SHORT).show()
+                if (cars.isEmpty() && binding.editTextSearch.text.toString().isNotEmpty()) {
+                    Toast.makeText(this@ListCar, "Автомобили не найдены", Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
+        // Наблюдение за ошибками
         lifecycleScope.launch {
-            viewModel.errorFlow.collect() {message ->
+            viewModel.errorFlow.collect { message ->
                 if (message != null) {
-                    Toast.makeText(this@ListCar,message, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ListCar, message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
+        // Наблюдение за загрузкой
         lifecycleScope.launch {
-            viewModel.isLoading.collect{ isLoading ->
+            viewModel.isLoading.collect { isLoading ->
                 binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
             }
         }
 
+        // Наблюдение за видимостью списка
         lifecycleScope.launch {
-            viewModel.isListVisible.collect{ isListVisiable ->
-                binding.carRecyclerView.visibility = if (isListVisiable) View.VISIBLE else View.GONE
+            viewModel.isListVisible.collect { isListVisible ->
+                binding.carRecyclerView.visibility = if (isListVisible) View.VISIBLE else View.GONE
             }
         }
 
+        // Наблюдение за видимостью ошибки
         lifecycleScope.launch {
-            viewModel.isErrorVisible.collect{ isVisiable ->
-                binding.errorView.visibility = if (isVisiable) View.VISIBLE else View.GONE
+            viewModel.isErrorVisible.collect { isVisible ->
+                binding.errorView.visibility = if (isVisible) View.VISIBLE else View.GONE
             }
         }
 
-
-
+        // Обработка поиска
+        binding.buttonSearch.setOnClickListener {
+            val query = binding.editTextSearch.text.toString().trim()
+            viewModel.updateSearchQuery(query)
+        }
+        //запуск загрузки данных
+        viewModel.checkAuthAndFetchData()
     }
-
 }

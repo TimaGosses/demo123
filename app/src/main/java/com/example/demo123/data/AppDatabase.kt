@@ -14,7 +14,7 @@ import kotlinx.serialization.json.Json
 
 //Описание базы данных
 
-@Database(entities = [CarEntity::class], version = 6, exportSchema = false)
+@Database(entities = [CarEntity::class], version = 13, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun carDao(): CarDao

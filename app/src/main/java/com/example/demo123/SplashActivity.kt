@@ -34,7 +34,7 @@ class SplashActivity : AppCompatActivity() {
                     result.isSuccess -> {
                         // Если результат успешный (не содержит исключения)
                         // Вы можете получить значение, если оно есть: result.getOrNull()
-                        startActivity(Intent(this@SplashActivity, GetCar::class.java))
+                        startActivity(Intent(this@SplashActivity, ListCar::class.java))
                         finish()
                     }
                     result.isFailure -> {
