@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.demo123.GetCar
+import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.CoroutineScope
@@ -38,11 +39,7 @@ class LoginActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_login)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+
 
         textEmail = findViewById(R.id.TextEmail)
         textPassword = findViewById(R.id.TextPassword)
@@ -88,14 +85,14 @@ class LoginActivity : AppCompatActivity() {
                 authManager.login(email, password)  //вызов authManager и вставка в него данных
             }
 
-           // progressBar.visibility = View.GONE
-           // textView.visibility = View.VISIBLE
+            // progressBar.visibility = View.GONE
+            // textView.visibility = View.VISIBLE
 
             if (result.isSuccess) {  // условие с успешной авторизацей
                 Toast.makeText(this@LoginActivity, "Успешная авторизация", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this@LoginActivity, ProfileActivity::class.java)//переход на другую страницу
-                startActivity(intent)
-                finish()
+                val intent = Intent(this@LoginActivity, ListCar::class.java)
+                startActivity(intent) //переход на другую страницу
+                //finish()
 
             } else {
                 Toast.makeText(

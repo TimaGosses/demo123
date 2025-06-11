@@ -38,7 +38,7 @@
             android:name=".CarDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".ListCar"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -61,23 +61,28 @@
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".ListCar"
             android:exported="false" />
         <activity
             android:name=".ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProfActivity"
             android:exported="false" />
         <activity
             android:name=".SplashActivity"
             android:exported="true" />
         <activity
             android:name=".GetCar"
-            android:exported="true"></activity>
+            android:exported="true">
+        </activity>
         <activity
             android:name=".Register"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
-            android:exported="false"></activity>
+            android:exported="false">
+        </activity>
     </application>
 
 </manifest>

@@ -61,7 +61,7 @@ class ListCar : AppCompatActivity() {
         }
 
         binding.buttonRegister.setOnClickListener {
-            startActivity(Intent(this, Register::class.java))
+            startActivity(Intent(this, ProfActivity::class.java))
         }
 
         binding.errorView.setOnClickListener {

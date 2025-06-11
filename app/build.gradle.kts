@@ -98,6 +98,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
 
     // Annotations
     implementation("org.jetbrains:annotations:24.1.0")

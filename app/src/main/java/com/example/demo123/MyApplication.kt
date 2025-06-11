@@ -2,6 +2,7 @@ package com.example.demo123
 
 import android.app.Application
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.example.demo123.data.customSerializersModule
@@ -14,6 +15,9 @@ import io.github.jan.supabase.storage.Storage
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.network.sockets.aSocket
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MyApplication : Application() {
     lateinit var supabase: SupabaseClient
@@ -40,6 +44,18 @@ class MyApplication : Application() {
 
         // Инициализируем AuthManager
         authManager = AuthManager(supabase.auth, sharedPreferences, supabase)
+
+        //восстановление сессии при запуске
+        val refreshToken = sharedPreferences.getString("refresh_token", null)
+        if (refreshToken != null){
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    supabase.auth.refreshSession(refreshToken)
+                }catch (e: Exception){
+                    Log.e("MyApplication","Ошибка восстановления сессии: ${e.message}")
+                }
+            }
+        }
     }
     private fun getClient(): SupabaseClient { // Теперь метод private, так как вызывается только внутри MyApplication
         return createSupabaseClient(

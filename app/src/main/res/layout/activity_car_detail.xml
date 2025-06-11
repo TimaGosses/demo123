@@ -13,6 +13,7 @@
         android:padding="16dp">
 
         <!-- Карусель фотографий -->
+
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPagerImages"
             android:layout_width="match_parent"
@@ -50,9 +51,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:textColor="@color/black"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/black"/>
+            android:textStyle="bold" />
         <TextView
             android:id="@+id/textBrandModel"
             android:layout_width="wrap_content"
@@ -119,8 +120,11 @@
             android:textSize="16sp"
             android:textColor="@color/black"/>
 
-
-
+        <ImageView
+            android:id="@+id/buttonback"
+            android:layout_width="wrap_content"
+            android:layout_height="31dp"
+            app:srcCompat="@mipmap/imageback_round" />
 
 
     </LinearLayout>

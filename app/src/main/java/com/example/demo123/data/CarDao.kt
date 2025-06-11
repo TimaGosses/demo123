@@ -16,6 +16,9 @@ interface CarDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCars(cars: List<CarEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCar(cars: List<CarEntity>)
+
     @Query("SELECT * FROM car_table ORDER BY updated_at DESC")
     fun getAllCars(): Flow<List<CarEntity>>
 

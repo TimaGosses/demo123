@@ -287,3 +287,26 @@ class CarRepository(
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
     }
 }
+
+
+
+
+    /*val carEntities = carsRaw.mapNotNull { car ->
+        try {
+            val bucketName = "carimage"
+            val signedUrls = car.images.mapNotNull { image ->
+                try {
+                    val filePath = when {
+                        image.image_url.startsWith("https://twkqrtcvsuwoyrbleuiu.supabase.co/storage/v1/object/public/$bucketName/") ->
+                            image.image_url.removePrefix("https://twkqrtcvsuwoyrbleuiu.supabase.co/storage/v1/object/public/$bucketName/")
+                        image.image_url.startsWith("public/$bucketName/") ->
+                            image.image_url.removePrefix("public/$bucketName/")
+                        image.image_url.startsWith("$bucketName/") ->
+                            image.image_url.removePrefix("$bucketName/")
+                        else -> image.image_url //если не распознан префикс, то используем локальный
+                    }.trim('/')
+                    Log.d("CarRepository","Генерация URL: image_url = ${image.image_url}, filePath = $filePath")
+                    val signedUrl = supabaseClient.storage.from(bucketName)
+                        .createSignedUrl(filePath, expiresIn = 5.hours)
+                    Log.d("CarRepository","Сгенерирован signedUrl $signedUrl")
+                    signedUrl*/

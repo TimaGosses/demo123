@@ -70,7 +70,7 @@ class CarDetailActivity : AppCompatActivity() {
 
                     .decodeSingle<UserData>()
                 withContext(Dispatchers.Main) {
-                    binding.textOwnerName.text = "${userData.Name}, ${userData.Middle_name}"
+                    binding.textOwnerName.text = "${userData.Name} ${userData.Middle_name}"
                     binding.buttonCall.setOnClickListener {
                         userData.Number_phone?.let { phone ->
                             Log.d("CarDetailActivity", "Попытка звонка на номер $phone")
@@ -90,10 +90,15 @@ class CarDetailActivity : AppCompatActivity() {
         imageAdapter = ImageAdapter(useUrls = true)
         binding.viewPagerImages.adapter = imageAdapter
         binding.dotsIndicator.setViewPager2(binding.viewPagerImages)
+        binding.buttonback.setOnClickListener {
+            val intent = Intent(this@CarDetailActivity, ListCar::class.java)
+            startActivity(intent)
+            finish()
+        }
 
         loadImagesToFiles(car.imageUrls)
         loadOwnerData(car.Владелец)
-        Log.d("CarDetailActivity", "Владелец из car: ${car.Владелец}, Длина: ${car.Владелец.length}")
+        Log.d("CarDetailActivity", "Владелец из car: ${car.Владелец} Длина: ${car.Владелец.length}")
 
         binding.textInfo.text = "Характеристики"
         binding.textBrandModel.text = "${car.Марка} ${car.Модель}"
@@ -107,7 +112,8 @@ class CarDetailActivity : AppCompatActivity() {
     }
 
     private suspend fun refreshImageUrl(imageUrl: String): String {
-        val fileName = imageUrl.substringAfterLast("/")
+        val fileName = imageUrl.substringAfterLast("/").substringBefore("?").trim()
+        Log.e("CarDetailActivity", "refreshImageUrl: imageUrl = :$imageUrl, fileName = $fileName")
         return try {
             supabaseClient.storage
                 .from("carimage")

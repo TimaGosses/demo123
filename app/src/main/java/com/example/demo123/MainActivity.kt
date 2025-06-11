@@ -14,12 +14,17 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.lifecycleScope
+import com.example.demo123.LoginActivity
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 class MainActivity : AppCompatActivity() {
@@ -28,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var editTextEmail: EditText
     private lateinit var editTextPassword: EditText
     private lateinit var button1: Button
+    private lateinit var supabaseClient: SupabaseClient
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,43 +42,31 @@ class MainActivity : AppCompatActivity() {
 
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        supabaseClient = (application as MyApplication).supabase
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val session = supabaseClient.auth.currentSessionOrNull()
+                withContext(Dispatchers.Main) {
+                    if (session != null){
+                        startActivity(Intent(this@MainActivity, ListCar::class.java))
+                        finish()
+                    }
+                    else{
+                        startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                        finish()
+                    }
+                }
+            }catch (e: Exception){
+                withContext(Dispatchers.Main) {
+                    Log.e("MainActivity","Ошибка проверки сессии: ${e.message}")
+                    startActivity(Intent(this@MainActivity, LoginActivity::class.java))
+                    finish()
+                }
+            }
         }
-        editTextId = findViewById(R.id.editTextTextId)
-        editTextEmail = findViewById(R.id.editTextTextEmail)
-        editTextPassword = findViewById(R.id.editTextTextPassword)
-        button1 = findViewById(R.id.button1)
-        getData()
-        button1.setOnClickListener {
-            val intent = Intent(this@MainActivity, Register::class.java)
-            startActivity(intent)
-        }
+
     }
-    private fun getData(){
-        lifecycleScope.launch {
-
-
-
-
-
-
-
-        }
-    }
-
-    /*private fun getClient(): SupabaseClient{
-        return createSupabaseClient(
-            supabaseUrl = "https://twkqrtcvsuwoyrbleuiu.supabase.co",
-            supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3a3FydGN2c3V3b3lyYmxldWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwNjc0MDYsImV4cCI6MjA1NTY0MzQwNn0.7v4fKtjArOa5PQSFakKtlQ7YI5UJb4Ju5Mf9rmnu8ew"
-        ){
-            install(Postgrest)
-            install(Auth)
-        }
-
-    }*/
 
 }
 
